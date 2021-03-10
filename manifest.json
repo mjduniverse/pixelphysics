@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "version": "0.0.1",
+    "name": "Sploder PPG Emulator",
+
+    "permissions": [
+        "https://sploder.com/",
+        "https://www.sploder.com/",
+        "https://cdn.sploder.com/"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": [
+                "https://sploder.com/*",
+                "https://www.sploder.com/*"
+            ],
+            "all_frames": true,
+            "js": [
+                "script.js",
+                "/vendor/matter.js",
+                "/vendor/decomp.js",
+                "/vendor/phsim.js"
+            ]
+        }
+    ]
+}
