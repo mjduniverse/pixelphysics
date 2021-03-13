@@ -1,0 +1,23 @@
+{
+  "name": "ppg-sploder-emulator",
+  "version": "0.0.1-alpha",
+  "description": "An emulator for games created by the Sploder Physics Puzzle Creator",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjduniverse/ppg-sploder-emulator.git"
+  },
+  "keywords": [
+    "sploder",
+    "ppg"
+  ],
+  "author": "Mjduniverse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mjduniverse/ppg-sploder-emulator/issues"
+  },
+  "homepage": "https://github.com/mjduniverse/ppg-sploder-emulator#readme"
+}
