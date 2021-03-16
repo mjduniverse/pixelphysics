@@ -17,7 +17,7 @@
             ],
             "all_frames": true,
             "js": [
-                "script.js",
+                "src/index.js",
                 "/vendor/matter.js",
                 "/vendor/decomp.js",
                 "/vendor/phsim.js"
