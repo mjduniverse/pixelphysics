@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/mjduniverse/ppg-sploder-emulator/issues"
   },
-  "homepage": "https://github.com/mjduniverse/ppg-sploder-emulator#readme"
+  "homepage": "https://github.com/mjduniverse/ppg-sploder-emulator#readme",
+  "dependencies": {
+    "webpack": "^5.26.2"
+  }
 }
