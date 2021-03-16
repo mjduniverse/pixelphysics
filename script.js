@@ -1,16 +1,5 @@
 'use strict';
 
-/**
- * Constructor for an instance of the emulator
- * @param {*} xmlTree - XML Document tree for the game
- */
-
-function PPGSploderEmulator(xmlTree) {
-
-    this.xmlTree = xmlTree;
-
-}
-
 PPGSploderEmulator.prototype.load = function() {
 
     var self = this;
