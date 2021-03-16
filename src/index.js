@@ -9,4 +9,8 @@ function PPGSploderEmulator(xmlTree) {
 
 }
 
-module.exports = PPGSploderEmulator;
+// Loading module
+
+import load from "./load";
+PPGSploderEmulator.prototype.load = load;
+
