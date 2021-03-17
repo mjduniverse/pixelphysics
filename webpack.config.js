@@ -4,6 +4,13 @@ module.exports = {
 
     output: {
         filename: "ppg-sploder-emulator.js"
-    }
+    },
+
+    mode: "production",
+    
+    optimization: {
+        minimize: false,
+        concatenateModules: false
+    },
     
 }
