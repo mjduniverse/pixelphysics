@@ -130,4 +130,4 @@ function createPhSimInstance() {
 
 }
 
-export default createPhSimInstance;
+module.exports = createPhSimInstance;
