@@ -32,6 +32,10 @@ function createPhSimDynObject(o) {
         p.noCollision = true;
     }
 
+    // Name
+
+    p.name = o.id;
+
     // Sensor Layers
 
     var sensorClassArr = [];
@@ -222,4 +226,4 @@ function createPhSimDynObject(o) {
 
 }
 
-export default createPhSimInstance;
+module.exports = createPhSimDynObject;
