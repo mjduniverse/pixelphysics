@@ -17,7 +17,7 @@
             ],
             "all_frames": true,
             "js": [
-                "src/index.js",
+                "/dist/ppg-sploder-emulator.js",
                 "/vendor/matter.js",
                 "/vendor/decomp.js",
                 "/vendor/phsim.js"
