@@ -11,20 +11,9 @@ function PPGSploderEmulator(xmlTree) {
 
 }
 
-// Loading module
+module.exports = PPGSploderEmulator;
 
-import load from "./load";
-PPGSploderEmulator.prototype.load = load;
-
-// PhSim instance 
-
-import createPhSimInstance from "./createPhSimInstance";
-PPGSploderEmulator.prototype.createPhSimInstance = createPhSimInstance;
-
-// createPhSimDynObject
-
-import createPhSimDynObject from "./createPhSimDynObject";
-PPGSploderEmulator.prototype.createPhSimDynObject = createPhSimDynObject;
+PPGSploderEmulator.prototype.objectIds = {};
 
 /**
  * 
@@ -410,6 +399,8 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         texture: a[27],
     }
 
+    this.objectIds[o.id] = o;
+
     o.phSimStaticObj = this.createPhSimDynObject(o);
 
     o.eventStack = {
@@ -544,8 +535,6 @@ window.addEventListener("load",function(){
 
         PPGSploderEmulator.createInstanceByPage().then(function(o){
 
-
-
             o.phsim.data = o.phsim.data || {};
 
             window.document.querySelector(".game_preview").style.display = "none";
@@ -623,3 +612,9 @@ window.addEventListener("load",function(){
 
 });
 
+// Loading modules
+
+PPGSploderEmulator.prototype.load = require("./load");
+PPGSploderEmulator.prototype.createPhSimInstance = require("./createPhSimInstance");
+PPGSploderEmulator.prototype.createPhSimDynObject = require("./createPhSimDynObject")
+PPGSploderEmulator.decodeExtensions = require("./decodeExtensions")
