@@ -22,5 +22,8 @@
   "homepage": "https://github.com/mjduniverse/ppg-sploder-emulator#readme",
   "dependencies": {
     "webpack": "^5.26.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.5.0"
   }
 }
