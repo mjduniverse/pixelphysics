@@ -1,24 +1,6 @@
-const EXTENSION_CODES = {
-    motor: 31,
-    bouncer: 25,
-    pinjoint: 26,
-    grove: 30,
-    spring_t: 28,
-    spring_l: 29,
-    gear_joint: 47,
-    mover: 33,
-    slider: 34,
-    jumper: 45,
-    aimer: 48,
-    dragger: 50,
-    clicker: 54,
-    arcade_mover: 55,
-    selector: 36,
-    adder: 37,
-    launcher: 35
-}
+const EXTENSION_CODES = require("./extensionCodes.json");
 
-PPGSploderEmulator.decodeExtensions = function(extensionData) {
+function decodeExtensions(extensionData) {
 
     let objectA = a[1];
     let objectB = a[3];
@@ -55,6 +37,15 @@ PPGSploderEmulator.decodeExtensions = function(extensionData) {
             extension: "dragger",
             objectA: a[1]
         }
-    }  
+    } 
+    
+    if(Number.parseFloat(a[0]) === EXTENSION_CODES.clicker) {
+        return {
+            extension: "clicker",
+            objectA: a[1]
+        }
+    }
 
 }
+
+module.exports = decodeExtensions;
