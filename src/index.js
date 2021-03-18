@@ -1,5 +1,7 @@
 'use strict';
 
+const dictionary = require("./dictionary.json");
+
 /**
  * Constructor for an instance of the emulator
  * @param {*} xmlTree - XML Document tree for the game
@@ -375,13 +377,13 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         center: PPGSploderEmulator.parseVector(a[1]),
         axis: PPGSploderEmulator.parseVector(a[2]),
         angle: Number.parseFloat(a[3]),
-        shape: PPGSploderEmulator.decodeShapeType(a[5]),
+        shape: dictionary.shapes[a[5]],
         width: Number.parseFloat(a[6]),
         height: Number.parseFloat(a[7]),
         path: PPGSploderEmulator.parseVectorSet(a[8]),
-        constraints: PPGSploderEmulator.decodeConstraints(a[9]),
-        material: PPGSploderEmulator.decodeMaterial(a[10]),
-        strength: PPGSploderEmulator.decodeStrength(a[11]),
+        constraints: dictionary.constraints[a[9]],
+        material: dictionary.material[a[10]],
+        strength: dictionary.strength[a[11]],
         lock: !!Number.parseInt(a[12]),
         collisionBitField: a[13],
         collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
