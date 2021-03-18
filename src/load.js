@@ -1,3 +1,5 @@
+const PPGSploderEmulator = require("./index");
+const decodeExtensions = require("./decodeExtensions"); 
 /**
  * Loading function for PPGSploderEmulator instances
  * @returns 
@@ -109,12 +111,25 @@ function load() {
             }
     
             // Data for physics, controls and widgets
+
+            let extensions = [];
     
             let xData = entitiesData[1]; 
-    
+            let xDataParts = xData.split("|");
+
+            if(xData) {
+                for(let i = 0; i < xDataParts.length; i++) {
+                    extensions.push(decodeExtensions(xDataParts[i]));
+                }    
+            }
+
             // Add level data
     
             self.levels.push({
+
+                data: levelDataStr,
+
+                extensions: extensions,
     
                 music: musicInfo,
     
@@ -226,4 +241,4 @@ function load() {
   
 }
 
-export default load;
+module.exports = load;
