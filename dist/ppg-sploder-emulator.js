@@ -375,11 +375,46 @@ module.exports = createPhSimInstance;
 
 /***/ }),
 
+/***/ 526:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const PPGSploderEmulator = __webpack_require__(138);
+const dictionary = __webpack_require__(280);
+
+function decodeExtensions(extensionData) {
+
+    var a = extensionData.split(";");
+
+    return {
+        extension: dictionary.extensions[a[0]],
+        objectA: a[1],
+        pointA: PPGSploderEmulator.parseVector(a[2]),
+        objectB: a[3],
+        pointB: PPGSploderEmulator.parseVector(a[4]),
+        radians: Number.parseFloat(a[5]),
+    }
+
+}
+
+module.exports = decodeExtensions;
+
+/***/ }),
+
+/***/ 280:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","45":"jumper","47":"gear_joint","48":"aimer","50":"dragger","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"}}');
+
+/***/ }),
+
 /***/ 138:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
+
+const dictionary = __webpack_require__(280);
 
 /**
  * Constructor for an instance of the emulator
@@ -756,13 +791,13 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         center: PPGSploderEmulator.parseVector(a[1]),
         axis: PPGSploderEmulator.parseVector(a[2]),
         angle: Number.parseFloat(a[3]),
-        shape: PPGSploderEmulator.decodeShapeType(a[5]),
+        shape: dictionary.shapes[a[5]],
         width: Number.parseFloat(a[6]),
         height: Number.parseFloat(a[7]),
         path: PPGSploderEmulator.parseVectorSet(a[8]),
-        constraints: PPGSploderEmulator.decodeConstraints(a[9]),
-        material: PPGSploderEmulator.decodeMaterial(a[10]),
-        strength: PPGSploderEmulator.decodeStrength(a[11]),
+        constraints: dictionary.constraints[a[9]],
+        material: dictionary.material[a[10]],
+        strength: dictionary.strength[a[11]],
         lock: !!Number.parseInt(a[12]),
         collisionBitField: a[13],
         collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
@@ -916,8 +951,6 @@ window.addEventListener("load",function(){
 
         PPGSploderEmulator.createInstanceByPage().then(function(o){
 
-
-
             o.phsim.data = o.phsim.data || {};
 
             window.document.querySelector(".game_preview").style.display = "none";
@@ -1000,7 +1033,7 @@ window.addEventListener("load",function(){
 PPGSploderEmulator.prototype.load = __webpack_require__(169);
 PPGSploderEmulator.prototype.createPhSimInstance = __webpack_require__(813);
 PPGSploderEmulator.prototype.createPhSimDynObject = __webpack_require__(476)
-
+PPGSploderEmulator.decodeExtensions = __webpack_require__(526)
 
 
 /***/ }),
@@ -1009,7 +1042,7 @@ PPGSploderEmulator.prototype.createPhSimDynObject = __webpack_require__(476)
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const PPGSploderEmulator = __webpack_require__(138);
-
+const decodeExtensions = __webpack_require__(526); 
 /**
  * Loading function for PPGSploderEmulator instances
  * @returns 
@@ -1121,8 +1154,17 @@ function load() {
             }
     
             // Data for physics, controls and widgets
+
+            let extensions = [];
     
             let xData = entitiesData[1]; 
+            let xDataParts = xData.split("|");
+
+            if(xData) {
+                for(let i = 0; i < xDataParts.length; i++) {
+                    extensions.push(decodeExtensions(xDataParts[i]));
+                }    
+            }
 
             // Add level data
     
@@ -1130,7 +1172,7 @@ function load() {
 
                 data: levelDataStr,
 
-                xData: entitiesData[1],
+                extensions: extensions,
     
                 music: musicInfo,
     
