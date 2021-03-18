@@ -1,0 +1,58 @@
+{
+    "extensions": {
+        "31": "motor",
+        "25": "bouncer",
+        "26": "pinjoint",
+        "30": "grove",
+        "28": "spring_t",
+        "29": "spring_l",
+        "47": "gear_joint",
+        "33": "mover",
+        "34": "slider",
+        "45": "jumper",
+        "48": "aimer",
+        "50": "dragger",
+        "54": "clicker",
+        "55": "arcade_mover",
+        "36": "selector",
+        "37": "adder",
+        "35": "launcher"
+    },
+
+    "strength": {
+        "21": "unbreakable",
+        "22": "barely_unbreakable",
+        "23": "average",
+        "24": "brittle"
+    },
+
+    "constraints": {
+        "11": null,
+        "10": "axis",
+        "9": "no_rotation",
+        "8": "lock"
+    },
+
+    "shapes": {
+        "6": "circle",
+        "7": "square",
+        "4": "rectangle",
+        "5": "right_angle_triangle",
+        "3": "pentagon",
+        "2": "hexagon",
+        "1": "custom_polygon"
+    },
+
+    "material": {
+        "17": "wood",
+        "16": "steel",
+        "15": "ice",
+        "14": "rubber",
+        "13": "glass",
+        "12": "tire",
+        "18": "nogravity",
+        "19": "antigravity",
+        "21": "magnet",
+        "51": "bouncy"
+    }
+}
