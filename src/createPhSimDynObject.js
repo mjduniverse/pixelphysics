@@ -129,7 +129,7 @@ function createPhSimDynObject(o) {
         p.x = o.center.x - o.width * 0.5;
         p.y = o.center.y - o.height * 0.5;
         p.w = o.width;
-        p.h = o.width;
+        p.h = o.height;
         p.shape = "rectangle";
 
         if(p.sprite) {

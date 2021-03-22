@@ -1,5 +1,11 @@
 const PPGSploderEmulator = require("./index");
 const decodeExtensions = require("./decodeExtensions"); 
+
+/**
+ * Module used to load game data
+ * @module src/load
+ */
+
 /**
  * Loading function for PPGSploderEmulator instances
  * @returns 
@@ -105,9 +111,23 @@ function load() {
             let bodyDataParts = bodyData.split("|");
     
             let bodies = [];
+            let bodyIds = {}
+            let groups = {}
     
             for(let i = 0; i < bodyDataParts.length; i++) {
-                bodies.push(self.extractObject(bodyDataParts[i]));
+
+                let body = self.extractObject(bodyDataParts[i]);
+                
+                // Body id structure
+
+                bodyIds[body.id] = body;
+
+                // Get object group, if object is grouped
+
+                groups[body.group] = groups[body.group] || [];
+                groups[body.group].push(body);
+
+                bodies.push(body);
             }
     
             // Data for physics, controls and widgets
@@ -132,6 +152,8 @@ function load() {
                 extensions: extensions,
     
                 music: musicInfo,
+
+                groups: groups,
     
                 gradient: {
                     top: PPGSploderEmulator.decodeColor(envArr[1]),
@@ -150,7 +172,7 @@ function load() {
     
                 starting_lives: Number.parseInt(envArr[7]),
     
-                max_penality: Number.parseInt(envArr[8]),
+                max_penalty: Number.parseInt(envArr[8]),
     
                 score_goal: Number.parseInt(envArr[9]),
     
@@ -158,7 +180,9 @@ function load() {
     
                 description: envArr[11],
     
-                bodies: bodies
+                bodies: bodies,
+
+                bodyIds: bodyIds
     
             });
     

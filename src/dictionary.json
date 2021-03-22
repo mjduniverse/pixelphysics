@@ -16,7 +16,15 @@
         "55": "arcade_mover",
         "36": "selector",
         "37": "adder",
-        "35": "launcher"
+        "35": "launcher",
+        "38": "elevator",
+        "39": "spawner",
+        "42": "factory",
+        "43": "eventLink",
+        "44": "switcher",
+        "46": "e_magnet",
+        "49": "pointer",
+        "53": "propeller"
     },
 
     "strength": {

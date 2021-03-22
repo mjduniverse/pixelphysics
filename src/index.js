@@ -9,7 +9,31 @@ const dictionary = require("./dictionary.json");
 
 function PPGSploderEmulator(xmlTree) {
 
+    var self = this;
+
     this.xmlTree = xmlTree;
+
+    this.currentGame = new Proxy(this.currentGameTarget,{
+
+        set: function(target,key,value) {
+
+            target[key] = value;
+
+            if(key === "score" && self.currentLevel.score_goal && self.currentLevel.score_goal === target.score) {
+                self.incrementLevel();
+            }
+
+            if(key === "penalty" && self.currentLevel.max_penalty && self.currentLevel.max_penalty === target.penalty) {
+                target.lives--;
+            }
+
+            if(key === "lives" && target.lives === 0) {
+                self.endGame();
+            }
+
+        }
+
+    });
 
 }
 
@@ -237,7 +261,12 @@ PPGSploderEmulator.decodePassthrough = function(n) {
     
 }
 
-PPGSploderEmulator.prototype.currentGame = {
+PPGSploderEmulator.prototype.renderGradient = function() {
+    this.phsim.ctx.fillStyle = this.grad;
+    this.phsim.ctx.fillRect(0 - this.phsim.camera.x,0 - this.phsim.camera.y,this.phsim.width / this.phsim.camera.scale,this.phsim.height / this.phsim.camera.scale);              
+}
+
+PPGSploderEmulator.prototype.currentGameTarget = {
     score: null,
     penalty: null,
     lives: null,
@@ -263,7 +292,7 @@ PPGSploderEmulator.decodeEvents = function(n) {
             onsensor: !!(n & Math.pow(2,31)),
             oncrush: !!(n & Math.pow(2,30)),
             onclone: !!(n & Math.pow(2,29)),
-            onboundsout: !!(n & Math.pow(2,28))
+            onboundsout: !!(n & Math.pow(2,28)),
         },
 
         penalty: {
@@ -377,6 +406,7 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         center: PPGSploderEmulator.parseVector(a[1]),
         axis: PPGSploderEmulator.parseVector(a[2]),
         angle: Number.parseFloat(a[3]),
+        group: Number.parseInt(a[4]),
         shape: dictionary.shapes[a[5]],
         width: Number.parseFloat(a[6]),
         height: Number.parseFloat(a[7]),
@@ -411,6 +441,10 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         clone: [],
         boundsout: []
     }
+
+    o.simulationEventStack = o.eventStack;
+
+    Object.assign(o,PhSim.PhSimEventTarget);
 
     return o;
 
@@ -548,59 +582,12 @@ window.addEventListener("load",function(){
             window.document.getElementById("flashcontent").appendChild(o.phsim.container);
 
             // Background Gradient
-
-            o.phsim.on("beforefirstslupdate",function(e){
-
-                let topClr = this.simulation.data.sploder.gradient.top;
-                let botClr = this.simulation.data.sploder.gradient.bottom;
-
-                let grad = this.ctx.createLinearGradient(0,0,0,o.phsim.canvas.height);
-
-                grad.addColorStop(0,topClr);
-                grad.addColorStop(1,botClr);
-        
-                o.phsim.on("aftercanvasclear",function(e){
-                    this.ctx.fillStyle = grad;
-                    this.ctx.fillRect(0 - this.camera.x,0 - this.camera.y,this.width / this.camera.scale,this.height / this.camera.scale);                })
-
-                console.log(this.objUniverse);
-
-                if(this.simulation.data.sploder.level_size === 1 || this.simulation.data.sploder.level_size === 2) {
-                    this.camera.zoomIn(0.5);
-                }
-
-                o.canvasIntervals = [];
-
-                for(let i = 0; i < this.objUniverse.length; i++) {
-
-                    if(this.objUniverse[i].sprite) {
-
-                        let phsim = this;
-
-                        let f = function() {
-    
-                            var obj = phsim.objUniverse[i];
-    
-                            return function() {
-                                o.updatePhSimSprite(obj.sprite)
-                            }
-    
-                        }
-    
-                        o.canvasIntervals.push(setInterval( f() , 250 ))
-
-                    }
-
-                }
-
-                console.log(o);
-                
-                debugger;
-            });
     
             window.ppgSploderEmulatorInstance = o;
 
-            o.phsim.play();
+            // Description
+
+            o.firstRender();
 
             debugger;
 
@@ -610,7 +597,7 @@ window.addEventListener("load",function(){
 
     }
 
-  
+    
 
 });
 
@@ -620,3 +607,10 @@ PPGSploderEmulator.prototype.load = require("./load");
 PPGSploderEmulator.prototype.createPhSimInstance = require("./createPhSimInstance");
 PPGSploderEmulator.prototype.createPhSimDynObject = require("./createPhSimDynObject")
 PPGSploderEmulator.decodeExtensions = require("./decodeExtensions")
+PPGSploderEmulator.prototype.implementExtensions = require("./implementExtensions");
+PPGSploderEmulator.prototype.implementEvents = require("./implementEvents");
+PPGSploderEmulator.prototype.renderGameData = require("./renderGameData");
+PPGSploderEmulator.prototype.setLevel = require("./setLevel");
+PPGSploderEmulator.prototype.firstRender = require("./firstRender");
+PPGSploderEmulator.prototype.createDescDiv = require("./descDiv");
+PPGSploderEmulator.prototype.incrementLevel = require("./incrementLevel");

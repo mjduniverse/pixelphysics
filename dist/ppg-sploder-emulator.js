@@ -135,7 +135,7 @@ function createPhSimDynObject(o) {
         p.x = o.center.x - o.width * 0.5;
         p.y = o.center.y - o.height * 0.5;
         p.w = o.width;
-        p.h = o.width;
+        p.h = o.height;
         p.shape = "rectangle";
 
         if(p.sprite) {
@@ -239,7 +239,6 @@ module.exports = createPhSimDynObject;
 /***/ 813:
 /***/ ((module) => {
 
-
 /**
  * Create PhSim instance
  * 
@@ -249,6 +248,8 @@ module.exports = createPhSimDynObject;
  */
 
 function createPhSimInstance() {
+
+    var ppgSploderEmulator = this;
 
     var staticSim = {
 
@@ -369,6 +370,27 @@ function createPhSimInstance() {
     this.phSimStatic = staticSim;
     this.phsim = new PhSim(staticSim);
 
+    this.phsim.container.appendChild(this.createDescDiv());
+
+    this.setLevel(this.levels[0]);
+
+    this.phsim.on("beforefirstslupdate",function(e){
+
+        ppgSploderEmulator.phsim.on("aftercanvasclear",function(e){
+            ppgSploderEmulator.renderGradient();  
+        });
+
+        ppgSploderEmulator.phsim.on("afterupdate",function(event){
+            ppgSploderEmulator.renderGameData();
+        });
+
+        console.log(this.objUniverse);
+
+        console.log(ppgSploderEmulator);
+        
+        debugger;
+    });
+
 }
 
 module.exports = createPhSimInstance;
@@ -378,6 +400,11 @@ module.exports = createPhSimInstance;
 /***/ 526:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+/**
+ * Module used to parse data for physics, controls and widgets.
+ * @module src/decodeExtensions
+ */
+
 const PPGSploderEmulator = __webpack_require__(138);
 const dictionary = __webpack_require__(280);
 
@@ -385,14 +412,42 @@ function decodeExtensions(extensionData) {
 
     var a = extensionData.split(";");
 
-    return {
+    var o = {
         extension: dictionary.extensions[a[0]],
-        objectA: a[1],
+        objectA: Number.parseInt(a[1]),
         pointA: PPGSploderEmulator.parseVector(a[2]),
-        objectB: a[3],
+        objectB: Number.parseInt(a[3]),
         pointB: PPGSploderEmulator.parseVector(a[4]),
-        radians: Number.parseFloat(a[5]),
     }
+
+    if(o.extension === "motor") {
+        o.radians = Number.parseFloat(a[5]);
+    }
+
+    if(o.extension === "arcade_mover") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+    }
+
+    if(o.extension === "jumper") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+        o.allowAirJumping = !!Number.parseFloat(a[10]);
+    }
+
+    if(o.extension === "mover") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+    }
+
+    if(o.extension === "adder") {
+        o.keyDownSpeed = Number.parseInt(a[5]);
+        o.lifespan = Number.parseFloat(a[7]);
+        o.useMouseClick = !!Number.parseInt(a[8]);
+        o.explodeOnExpire = !!Number.parseInt(a[9]);
+    }
+
+    return o;
 
 }
 
@@ -400,11 +455,467 @@ module.exports = decodeExtensions;
 
 /***/ }),
 
+/***/ 942:
+/***/ ((module) => {
+
+function createDescDiv() {
+
+    var self = this;
+
+    // Description
+
+    var descDiv = document.createElement("div");
+
+    descDiv.style = `position: relative;
+    bottom: 387px;
+    background: rgba(0,0,0,0.8);
+    left: 129px;
+    height: 243px;
+    color: lightblue;
+    border-radius: 10px;
+    padding: 20px;
+    width: 345px;`
+
+    // Description Text
+
+    var descTxt = document.createElement("p");
+    descDiv.appendChild(descTxt);
+    this.descTxt = descTxt;
+
+    // Play button
+
+    var playButton = document.createElement("span");
+    playButton.className = "ppg-sploder-emulator-play-button";
+    playButton.innerText = "Play";
+
+    playButton.style = `float: right;
+    background-color: #ffb700;
+    color: #000000;
+    border-radius: 10px;
+    padding: 10px;
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    margin: 20px;
+    cursor: pointer;`
+
+    playButton.addEventListener("click",function(){
+
+        self.phsim.play().then(function(){
+
+            self.playing = true;
+
+            self.timeLimitCount = setInterval(function(){
+                if(self.playing) {
+                    self.currentGame.time--;
+                }
+            },1000);
+
+            if(self.currentLevel.time_limit) {
+
+                self.timeLimitTimeout = setTimeout(function(){
+
+                    if(self.currentLevel.goal_score) {
+                        self.endGame();
+                    }
+    
+                    else {
+                        self.incrementLevel();
+                    }
+    
+                },self.currentLevel.time_limit * 1000);
+
+            }
+
+        });
+
+        self.descDiv.style.display = "none";
+
+    })
+
+    descDiv.appendChild(playButton);
+
+    this.descDiv = descDiv;
+
+    return descDiv;
+
+}
+
+module.exports = createDescDiv;
+
+/***/ }),
+
 /***/ 280:
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","45":"jumper","47":"gear_joint","48":"aimer","50":"dragger","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"}}');
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"}}');
+
+/***/ }),
+
+/***/ 653:
+/***/ ((module) => {
+
+function firstRender() {
+
+    this.renderGradient(); 
+
+    for(let i = 0; i < this.phsim.objUniverse.length; i++) {
+        this.phsim.phRender.dynamicRenderDraw(this.phsim.objUniverse[i]);
+    }
+
+    this.renderGameData();
+
+}
+
+module.exports = firstRender;
+
+/***/ }),
+
+/***/ 785:
+/***/ ((module) => {
+
+function implementEvents(obj) {
+
+    var dynObject = this.phsim.getObjectByName(obj.id);
+    var emulatorInstance = this;
+
+    // Score events
+
+    if(obj.events.score.onsensor) {
+
+        let f = function(){
+            emulatorInstance.currentGame.score++;
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.score.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.currentGame.score++;
+        });
+
+    }
+
+    if(obj.events.score.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.currentGame.score++;
+        });
+        
+    }
+
+    if(obj.events.score.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.currentGame.score++;
+        });
+        
+    }
+
+    // Penalty events
+
+    if(obj.events.penalty.onsensor) {
+
+        let f = function(){
+            emulatorInstance.currentGame.penalty++;
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.penalty.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.currentGame.penalty++;
+        });
+
+    }
+
+    if(obj.events.penalty.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.currentGame.penalty++;
+        });
+        
+    }
+
+    if(obj.events.penalty.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.currentGame.penalty++;
+        });
+        
+    }
+
+    this.phsim.on("collisionstart",function(){
+        if(this.inSensorCollision(dynObject)) {
+            obj.callEventClass("sensor",emulatorInstance,{});
+        }
+    });
+
+}
+
+module.exports = implementEvents;
+
+/***/ }),
+
+/***/ 254:
+/***/ ((module) => {
+
+/**
+ * 
+ * @param {*} level
+ * @this PPGSploderEmulator 
+ */
+
+function implementExtensions(levelObject) {
+
+    var emulatorInstance = this;
+
+    for(let i = 0; i < levelObject.extensions.length; i++) {
+
+        let o = levelObject.extensions[i];
+        let bodyA = levelObject.bodyIds[o.objectA];
+        let bodyB = levelObject.bodyIds[o.objectB];
+
+        // Implement pinjoint
+
+        if(o.extension === "pinjoint") {
+
+            let opts = {
+                pointA: o.pointA,
+                pointB: o.pointB,
+                stiffness: 1,
+            }
+
+            if(bodyA) {
+                opts.bodyA = emulatorInstance.phsim.getObjectByName(o.objectA).matter;
+            }
+
+            if(bodyB) {
+                opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
+            }
+
+            Matter.Constraint.create(opts)
+
+        }
+
+        // Implement Clicker
+
+        if(o.extension === "clicker") {
+
+            var f = function() {
+
+                var obj = bodyA;
+
+                return function() {
+                    for(var i = 0; i < obj.eventStack.sensor.length; i++) {
+                        obj.eventStack.sensor[i]();
+                    }
+                }
+            }
+
+            emulatorInstance.phsim.getObjectByName(o.objectA).on("objclick",f());
+
+        }
+
+        // Implement eventLink
+
+        if(o.extension === "eventLink" && o.objectA && o.objectB) {
+
+            let f = function(){
+
+                var objectB = bodyB;
+
+                var g = function() {
+
+                    for(let j = 0; j < objectB.eventStack.sensor.length; j++) {
+                        bodyA.off("sensor",g)
+                        objectB.eventStack.sensor[j]();
+                    }
+
+                }
+
+                return g;
+
+            };
+
+            bodyA.on("sensor",f())
+        }
+
+        // Implement jumper
+
+        if(o.extension === "jumper") {
+
+            window.addEventListener("keydown",(function(){
+
+                var up = {
+                    x: o.pointB.x,
+                    y: o.pointB.y,
+                }
+
+                var object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+                var upArrow = /KeyW|ArrowUp/;
+
+                if(o.arrowKeysOnly) {
+                    upArrow = "ArrowUp";
+                }
+
+                if(o.wasdKeysOnly) {
+                    upArrow = "KeyW";
+                }
+
+                return function(event) {
+
+                    if(event.code.match(upArrow)) {
+                        PhSim.Motion.setVelocity(object,up);
+                    }
+                                        
+                }
+
+            })());
+
+        }
+
+        // Implement mover
+
+        if(o.extension === "mover") {
+
+            window.addEventListener("keydown",(function(){
+
+                var up = {
+                    x: o.pointB.x,
+                    y: o.pointB.y,
+                }
+
+                var down = {
+                    x: -o.pointB.x,
+                    y: -o.pointB.y,
+                }
+
+                var object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+                var upArrow = /KeyW|ArrowUp/;
+                var downArrow = /keyS|ArrowDown/;
+
+                if(o.arrowKeysOnly) {
+                    upArrow = "ArrowUp";
+                    downArrow = "ArrowDown"
+                }
+
+                if(o.wasdKeysOnly) {
+                    upArrow = "KeyW";
+                    downArrow = "KeyS";
+                }
+
+                return function(event) {
+
+                    if(event.code.match(upArrow)) {
+                        PhSim.Motion.setVelocity(object,up);
+                    }
+                    
+                    if(event.code.match(downArrow)) {
+                        PhSim.Motion.setVelocity(object,down);
+                    }
+                    
+                }
+
+            })());
+
+        }
+
+        // Implement slider
+
+        if(o.extension === "slider") {
+
+            window.addEventListener("keydown",(function(){
+
+                var left = {
+                    x: o.pointB.x / 1000,
+                    y: o.pointB.y / 1000,
+                }
+
+                var right = {
+                    x: -o.pointB.x / 1000,
+                    y: -o.pointB.y / 1000,
+                }
+
+                var object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+                var leftArrow = /KeyA|ArrowLeft/;
+                var rightArrow = /keyD|ArrowRight/;
+
+                if(o.arrowKeysOnly) {
+                    leftArrow = "ArrowLeft";
+                    rightArrow = "ArrowRight"
+                }
+
+                if(o.wasdKeysOnly) {
+                    leftArrow = "KeyA";
+                    rightArrow = "KeyD";
+                }
+
+                return function(event) {
+
+                    if(event.code.match(leftArrow)) {
+                        PhSim.Motion.applyForce(object,object.matter.position,left);
+                    }
+                    
+                    if(event.code.match(rightArrow)) {
+                        PhSim.Motion.applyForce(object,object.matter.position,right);
+                    }
+                    
+                }
+
+            })());
+
+        }
+
+    }
+
+}
+
+module.exports = implementExtensions;
+
+/***/ }),
+
+/***/ 554:
+/***/ ((module) => {
+
+function incrementLevel() {
+
+    var self = this;
+
+    return new Promise(function(resolve,reject){
+
+        if(self.levels[self.currentLevelIndex + 1]) {
+            setTimeout(function(){
+
+                self.setLevel(self.levels[self.currentLevelIndex + 1]);
+
+                self.phsim.gotoSimulationIndex(self.phsim.simulationIndex + 1).then(function(){
+                    self.firstRender();
+                    resolve();
+                });
+
+            },1000);
+        }
+
+        else {
+            reject()
+        }
+        
+    });
+
+}
+
+module.exports = incrementLevel;
 
 /***/ }),
 
@@ -423,7 +934,31 @@ const dictionary = __webpack_require__(280);
 
 function PPGSploderEmulator(xmlTree) {
 
+    var self = this;
+
     this.xmlTree = xmlTree;
+
+    this.currentGame = new Proxy(this.currentGameTarget,{
+
+        set: function(target,key,value) {
+
+            target[key] = value;
+
+            if(key === "score" && self.currentLevel.score_goal && self.currentLevel.score_goal === target.score) {
+                self.incrementLevel();
+            }
+
+            if(key === "penalty" && self.currentLevel.max_penalty && self.currentLevel.max_penalty === target.penalty) {
+                target.lives--;
+            }
+
+            if(key === "lives" && target.lives === 0) {
+                self.endGame();
+            }
+
+        }
+
+    });
 
 }
 
@@ -651,7 +1186,12 @@ PPGSploderEmulator.decodePassthrough = function(n) {
     
 }
 
-PPGSploderEmulator.prototype.currentGame = {
+PPGSploderEmulator.prototype.renderGradient = function() {
+    this.phsim.ctx.fillStyle = this.grad;
+    this.phsim.ctx.fillRect(0 - this.phsim.camera.x,0 - this.phsim.camera.y,this.phsim.width / this.phsim.camera.scale,this.phsim.height / this.phsim.camera.scale);              
+}
+
+PPGSploderEmulator.prototype.currentGameTarget = {
     score: null,
     penalty: null,
     lives: null,
@@ -677,7 +1217,7 @@ PPGSploderEmulator.decodeEvents = function(n) {
             onsensor: !!(n & Math.pow(2,31)),
             oncrush: !!(n & Math.pow(2,30)),
             onclone: !!(n & Math.pow(2,29)),
-            onboundsout: !!(n & Math.pow(2,28))
+            onboundsout: !!(n & Math.pow(2,28)),
         },
 
         penalty: {
@@ -791,6 +1331,7 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         center: PPGSploderEmulator.parseVector(a[1]),
         axis: PPGSploderEmulator.parseVector(a[2]),
         angle: Number.parseFloat(a[3]),
+        group: Number.parseInt(a[4]),
         shape: dictionary.shapes[a[5]],
         width: Number.parseFloat(a[6]),
         height: Number.parseFloat(a[7]),
@@ -825,6 +1366,10 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         clone: [],
         boundsout: []
     }
+
+    o.simulationEventStack = o.eventStack;
+
+    Object.assign(o,PhSim.PhSimEventTarget);
 
     return o;
 
@@ -962,59 +1507,12 @@ window.addEventListener("load",function(){
             window.document.getElementById("flashcontent").appendChild(o.phsim.container);
 
             // Background Gradient
-
-            o.phsim.on("beforefirstslupdate",function(e){
-
-                let topClr = this.simulation.data.sploder.gradient.top;
-                let botClr = this.simulation.data.sploder.gradient.bottom;
-
-                let grad = this.ctx.createLinearGradient(0,0,0,o.phsim.canvas.height);
-
-                grad.addColorStop(0,topClr);
-                grad.addColorStop(1,botClr);
-        
-                o.phsim.on("aftercanvasclear",function(e){
-                    this.ctx.fillStyle = grad;
-                    this.ctx.fillRect(0 - this.camera.x,0 - this.camera.y,this.width / this.camera.scale,this.height / this.camera.scale);                })
-
-                console.log(this.objUniverse);
-
-                if(this.simulation.data.sploder.level_size === 1 || this.simulation.data.sploder.level_size === 2) {
-                    this.camera.zoomIn(0.5);
-                }
-
-                o.canvasIntervals = [];
-
-                for(let i = 0; i < this.objUniverse.length; i++) {
-
-                    if(this.objUniverse[i].sprite) {
-
-                        let phsim = this;
-
-                        let f = function() {
-    
-                            var obj = phsim.objUniverse[i];
-    
-                            return function() {
-                                o.updatePhSimSprite(obj.sprite)
-                            }
-    
-                        }
-    
-                        o.canvasIntervals.push(setInterval( f() , 250 ))
-
-                    }
-
-                }
-
-                console.log(o);
-                
-                debugger;
-            });
     
             window.ppgSploderEmulatorInstance = o;
 
-            o.phsim.play();
+            // Description
+
+            o.firstRender();
 
             debugger;
 
@@ -1024,7 +1522,7 @@ window.addEventListener("load",function(){
 
     }
 
-  
+    
 
 });
 
@@ -1034,7 +1532,13 @@ PPGSploderEmulator.prototype.load = __webpack_require__(169);
 PPGSploderEmulator.prototype.createPhSimInstance = __webpack_require__(813);
 PPGSploderEmulator.prototype.createPhSimDynObject = __webpack_require__(476)
 PPGSploderEmulator.decodeExtensions = __webpack_require__(526)
-
+PPGSploderEmulator.prototype.implementExtensions = __webpack_require__(254);
+PPGSploderEmulator.prototype.implementEvents = __webpack_require__(785);
+PPGSploderEmulator.prototype.renderGameData = __webpack_require__(28);
+PPGSploderEmulator.prototype.setLevel = __webpack_require__(574);
+PPGSploderEmulator.prototype.firstRender = __webpack_require__(653);
+PPGSploderEmulator.prototype.createDescDiv = __webpack_require__(942);
+PPGSploderEmulator.prototype.incrementLevel = __webpack_require__(554);
 
 /***/ }),
 
@@ -1043,6 +1547,12 @@ PPGSploderEmulator.decodeExtensions = __webpack_require__(526)
 
 const PPGSploderEmulator = __webpack_require__(138);
 const decodeExtensions = __webpack_require__(526); 
+
+/**
+ * Module used to load game data
+ * @module src/load
+ */
+
 /**
  * Loading function for PPGSploderEmulator instances
  * @returns 
@@ -1148,9 +1658,23 @@ function load() {
             let bodyDataParts = bodyData.split("|");
     
             let bodies = [];
+            let bodyIds = {}
+            let groups = {}
     
             for(let i = 0; i < bodyDataParts.length; i++) {
-                bodies.push(self.extractObject(bodyDataParts[i]));
+
+                let body = self.extractObject(bodyDataParts[i]);
+                
+                // Body id structure
+
+                bodyIds[body.id] = body;
+
+                // Get object group, if object is grouped
+
+                groups[body.group] = groups[body.group] || [];
+                groups[body.group].push(body);
+
+                bodies.push(body);
             }
     
             // Data for physics, controls and widgets
@@ -1175,6 +1699,8 @@ function load() {
                 extensions: extensions,
     
                 music: musicInfo,
+
+                groups: groups,
     
                 gradient: {
                     top: PPGSploderEmulator.decodeColor(envArr[1]),
@@ -1193,7 +1719,7 @@ function load() {
     
                 starting_lives: Number.parseInt(envArr[7]),
     
-                max_penality: Number.parseInt(envArr[8]),
+                max_penalty: Number.parseInt(envArr[8]),
     
                 score_goal: Number.parseInt(envArr[9]),
     
@@ -1201,7 +1727,9 @@ function load() {
     
                 description: envArr[11],
     
-                bodies: bodies
+                bodies: bodies,
+
+                bodyIds: bodyIds
     
             });
     
@@ -1285,6 +1813,111 @@ function load() {
 }
 
 module.exports = load;
+
+/***/ }),
+
+/***/ 28:
+/***/ ((module) => {
+
+/**
+ * Render game data
+ * @this PPGSploderEmulator
+ */
+
+function renderGameData() {
+
+    this.phsim.ctx.textAlign = "left";
+    this.phsim.ctx.fillStyle = "white";
+    this.phsim.ctx.fillText("Lives: " + this.currentGame.lives + " Penalty: " + this.currentGame.penalty + " / " + this.currentLevel.max_penalty + " Score: " + this.currentGame.score + "/" + this.currentLevel.score_goal,10,19);
+
+    this.phsim.ctx.fillText(this.currentGame.time,400,400);
+
+}
+
+module.exports= renderGameData;
+
+/***/ }),
+
+/***/ 574:
+/***/ ((module) => {
+
+/**
+ * Set level
+ * @param {*} level 
+ * @this PPGSploderEmulator
+ */
+
+function setLevel(level) {
+
+    if(typeof this.timeLimitCount === "number") {
+        clearInterval(this.timeLimitCount);
+    }
+
+    this.playing = false;
+
+    this.phsim.pause();
+
+    this.currentLevel = level; 
+
+    this.currentLevelIndex = this.levels.indexOf(level);
+
+    this.descTxt.innerText = this.currentLevel.description;
+    this.descDiv.style.display = "block";
+    
+    this.currentGame.time = this.currentLevel.time_limit;
+    this.currentGame.score = 0;
+    this.currentGame.penalty = 0;
+    this.currentGame.lives = this.currentLevel.starting_lives;
+
+    let topClr = this.currentLevel.gradient.top;
+    let botClr = this.currentLevel.gradient.bottom;
+
+    let grad = this.phsim.ctx.createLinearGradient(0,0,0,this.phsim.canvas.height);
+
+    grad.addColorStop(0,topClr);
+    grad.addColorStop(1,botClr);
+
+    this.grad = grad;
+
+    this.implementExtensions(this.currentLevel);
+
+    for(let i = 0; i < this.currentLevel.bodies.length; i++) {
+        this.implementEvents(this.currentLevel.bodies[i]);
+    }
+
+    this.canvasIntervals = [];
+
+    for(let i = 0; i < this.phsim.objUniverse.length; i++) {
+
+        if(this.phsim.objUniverse[i].sprite) {
+
+            let self = this;
+
+            let f = function() {
+
+                var obj = self.phsim.objUniverse[i];
+                var o = self;
+
+                return function() {
+                    o.updatePhSimSprite(obj.sprite)
+                }
+
+            }
+
+            this.canvasIntervals.push(setInterval( f() , 250 ));
+
+        }
+
+    }
+
+    
+    if(this.currentLevel.level_size === 1 || this.currentLevel.level_size === 2) {
+        this.phsim.camera.zoomIn(0.5);
+    }
+
+}
+
+module.exports = setLevel;
 
 /***/ })
 

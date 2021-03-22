@@ -1,4 +1,3 @@
-
 /**
  * Create PhSim instance
  * 
@@ -8,6 +7,8 @@
  */
 
 function createPhSimInstance() {
+
+    var ppgSploderEmulator = this;
 
     var staticSim = {
 
@@ -127,6 +128,27 @@ function createPhSimInstance() {
 
     this.phSimStatic = staticSim;
     this.phsim = new PhSim(staticSim);
+
+    this.phsim.container.appendChild(this.createDescDiv());
+
+    this.setLevel(this.levels[0]);
+
+    this.phsim.on("beforefirstslupdate",function(e){
+
+        ppgSploderEmulator.phsim.on("aftercanvasclear",function(e){
+            ppgSploderEmulator.renderGradient();  
+        });
+
+        ppgSploderEmulator.phsim.on("afterupdate",function(event){
+            ppgSploderEmulator.renderGameData();
+        });
+
+        console.log(this.objUniverse);
+
+        console.log(ppgSploderEmulator);
+        
+        debugger;
+    });
 
 }
 

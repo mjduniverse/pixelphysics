@@ -1,3 +1,8 @@
+/**
+ * Module used to parse data for physics, controls and widgets.
+ * @module src/decodeExtensions
+ */
+
 const PPGSploderEmulator = require(".");
 const dictionary = require("./dictionary.json");
 
@@ -7,9 +12,9 @@ function decodeExtensions(extensionData) {
 
     var o = {
         extension: dictionary.extensions[a[0]],
-        objectA: a[1],
+        objectA: Number.parseInt(a[1]),
         pointA: PPGSploderEmulator.parseVector(a[2]),
-        objectB: a[3],
+        objectB: Number.parseInt(a[3]),
         pointB: PPGSploderEmulator.parseVector(a[4]),
     }
 
@@ -22,15 +27,25 @@ function decodeExtensions(extensionData) {
         o.wasdKeysOnly = !!Number.parseFloat(a[9]);
     }
 
+    if(o.extension === "jumper") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+        o.allowAirJumping = !!Number.parseFloat(a[10]);
+    }
+
     if(o.extension === "mover") {
         o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
         o.wasdKeysOnly = !!Number.parseFloat(a[9]);
     }
 
     if(o.extension === "adder") {
+        o.keyDownSpeed = Number.parseInt(a[5]);
         o.lifespan = Number.parseFloat(a[7]);
+        o.useMouseClick = !!Number.parseInt(a[8]);
+        o.explodeOnExpire = !!Number.parseInt(a[9]);
     }
 
+    return o;
 
 }
 

@@ -6121,10 +6121,17 @@ PhSim.prototype.getCollisionList = function(dynObject) {
 	this.matterJSEngine.pairs.list.forEach(function(c){
 		if(c.bodyA.plugin.dynObject === dynObject || c.bodyB.plugin.dynObject === dynObject) {
 			var p = new PhSim.Events.PhSimCollision();
-			p.bodyA = c.bodyA.plugin.dynObject;
-			p.bodyB = c.bodyA.plugin.dynObject;
+
+			p.bodyA = c.bodyA.parent.plugin.dynObject;
+			p.bodyB = c.bodyA.parent.plugin.dynObject;
+
 			p.matter = c;
 			a.push(p);
+
+			if(!c.bodyA.parent.plugin.dynObject || !c.bodyB.parent.plugin.dynObject) {
+				debugger;
+			}
+
 		}
 	});
 
@@ -6260,11 +6267,11 @@ PhSim.Query.getCollidingSensorObjects = function(phSim,dynObject) {
 		var dynCol = a[i]
 		var matterCol = dynCol.matter;
 
-		if(matterCol.bodyA.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyB)) {
+		if(matterCol.bodyA.parent.plugin.dynObject.id === dynObnpject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyB)) {
 			b.push(dynCol.bodyB);
 		}
 
-		if(matterCol.bodyB.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyA)) {
+		if(matterCol.bodyB.parent.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyA)) {
 			b.push(dynCol.bodyA);		
 		}
 
@@ -6294,11 +6301,11 @@ PhSim.prototype.getCollidingSensorObjects = function(dynObject) {
 		var dynCol = a[i]
 		var matterCol = dynCol.matter;
 
-		if(matterCol.bodyA.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyB)) {
+		if(matterCol.bodyA.parent.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyB)) {
 			b.push(dynCol.bodyB);
 		}
 
-		if(matterCol.bodyB.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyA)) {
+		if(matterCol.bodyB.parent.plugin.dynObject.id === dynObject.id && PhSim.Query.sameSensorClasses(dynObject,dynCol.bodyA)) {
 			b.push(dynCol.bodyA);		
 		}
 
