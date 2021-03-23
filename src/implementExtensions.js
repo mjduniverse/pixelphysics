@@ -32,7 +32,7 @@ function implementExtensions(levelObject) {
                 opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
             }
 
-            Matter.Constraint.create(opts)
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
 
         }
 
@@ -43,15 +43,25 @@ function implementExtensions(levelObject) {
             var f = function() {
 
                 var obj = bodyA;
+                var dynObject = emulatorInstance.phsim.getObjectByName(o.objectA);
 
                 return function() {
-                    for(var i = 0; i < obj.eventStack.sensor.length; i++) {
-                        obj.eventStack.sensor[i]();
+
+                    var x = emulatorInstance.phsim.mouseX / emulatorInstance.phsim.camera.scale;
+                    var y = emulatorInstance.phsim.mouseY / emulatorInstance.phsim.camera.scale
+
+                    if(emulatorInstance.phsim.pointInObject(dynObject,x,y)) {
+        
+                        for(var i = 0; i < obj.eventStack.sensor.length; i++) {
+                            obj.eventStack.sensor[i]();
+                        }
+
                     }
+
                 }
             }
 
-            emulatorInstance.phsim.getObjectByName(o.objectA).on("objclick",f());
+            emulatorInstance.phsim.on("click",f());
 
         }
 

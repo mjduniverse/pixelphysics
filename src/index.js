@@ -17,6 +17,10 @@ function PPGSploderEmulator(xmlTree) {
 
         set: function(target,key,value) {
 
+            if(key === "lives" && value === 0 && target.lives > 0) {
+                self.endGame();
+            }
+
             target[key] = value;
 
             if(key === "score" && self.currentLevel.score_goal && self.currentLevel.score_goal === target.score) {
@@ -25,10 +29,6 @@ function PPGSploderEmulator(xmlTree) {
 
             if(key === "penalty" && self.currentLevel.max_penalty && self.currentLevel.max_penalty === target.penalty) {
                 target.lives--;
-            }
-
-            if(key === "lives" && target.lives === 0) {
-                self.endGame();
             }
 
         }
@@ -302,7 +302,7 @@ PPGSploderEmulator.decodeEvents = function(n) {
             onboundsout: !!(n & Math.pow(2,24))
         },
 
-        loose_score: {
+        loseLife: {
             onsensor: !!(n & Math.pow(2,23)),
             oncrush: !!(n & Math.pow(2,22)),
             onclone: !!(n & Math.pow(2,21)),
