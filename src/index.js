@@ -195,6 +195,14 @@ PPGSploderEmulator.decodeShapeType = function(n) {
 }
 
 /**
+ * 
+ * @param {*} str 
+ * @returns 
+ */
+
+
+
+/**
  * Convert vector from string form to JavaScript object form
  * @param {String} str 
  * @returns {Object} - Vector Object
@@ -552,16 +560,6 @@ PPGSploderEmulator.prototype.updateAllPhSimSprites = function() {
     }
 }
 
-
-/**
- * Decode graphics from base64
- * @function
- *
- */
-
-PPGSploderEmulator.prototype.decodeGraphics = function() {
-    this.xmlTree
-}
 
 const PPG_INFO = "This is a game made with Sploder's physics game creator."
 

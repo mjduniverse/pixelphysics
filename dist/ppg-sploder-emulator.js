@@ -652,6 +652,114 @@ function implementEvents(obj) {
         
     }
 
+    // Lose Life
+
+    if(obj.events.loseLife.onsensor) {
+
+        let f = function(){
+            emulatorInstance.currentGame.lives--;
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.loseLife.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.currentGame.lives--;
+        });
+
+    }
+
+    if(obj.events.loseLife.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.currentGame.lives--;
+        });
+        
+    }
+
+    if(obj.events.loseLife.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.currentGame.lives--;
+        });
+        
+    }
+
+    // Add Life
+
+    if(obj.events.addLife.onsensor) {
+
+        let f = function(){
+            emulatorInstance.currentGame.lives++;
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.addLife.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.currentGame.lives++;
+        });
+
+    }
+
+    if(obj.events.addLife.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.currentGame.lives++;
+        });
+        
+    }
+
+    if(obj.events.addLife.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.currentGame.lives++;
+        });
+        
+    }
+
+    // Unlock
+
+    if(obj.events.unlock.onsensor) {
+
+        let f = function(){
+            emulatorInstance.phsim.setLock(dynObject,false);
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.unlock.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.phsim.setLock(dynObject,false);
+        });
+
+    }
+
+    if(obj.events.unlock.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.phsim.setLock(dynObject,false);
+        });
+        
+    }
+
+    if(obj.events.unlock.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.phsim.setLock(dynObject,false);
+        });
+        
+    }
+
     this.phsim.on("collisionstart",function(){
         if(this.inSensorCollision(dynObject)) {
             obj.callEventClass("sensor",emulatorInstance,{});
@@ -765,8 +873,8 @@ function implementExtensions(levelObject) {
             window.addEventListener("keydown",(function(){
 
                 var up = {
-                    x: o.pointB.x,
-                    y: o.pointB.y,
+                    x: o.pointB.x / 100,
+                    y: o.pointB.y / 100,
                 }
 
                 var object = emulatorInstance.phsim.getObjectByName(o.objectA);
@@ -1487,16 +1595,6 @@ PPGSploderEmulator.prototype.updateAllPhSimSprites = function() {
     }
 }
 
-
-/**
- * Decode graphics from base64
- * @function
- *
- */
-
-PPGSploderEmulator.prototype.decodeGraphics = function() {
-    this.xmlTree
-}
 
 const PPG_INFO = "This is a game made with Sploder's physics game creator."
 

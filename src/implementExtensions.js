@@ -96,8 +96,8 @@ function implementExtensions(levelObject) {
             window.addEventListener("keydown",(function(){
 
                 var up = {
-                    x: o.pointB.x,
-                    y: o.pointB.y,
+                    x: o.pointB.x / 100,
+                    y: o.pointB.y / 100,
                 }
 
                 var object = emulatorInstance.phsim.getObjectByName(o.objectA);

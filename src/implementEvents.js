@@ -147,12 +147,12 @@ function implementEvents(obj) {
         
     }
 
-    // Add Life
+    // Unlock
 
     if(obj.events.unlock.onsensor) {
 
         let f = function(){
-            emulatorInstance.currentGame.lives++;
+            emulatorInstance.phsim.setLock(dynObject,false);
         };
 
         obj.on("sensor",f);
@@ -162,7 +162,7 @@ function implementEvents(obj) {
     if(obj.events.unlock.oncrush) {
         
         obj.on("crush",function(){
-            emulatorInstance.currentGame.lives++;
+            emulatorInstance.phsim.setLock(dynObject,false);
         });
 
     }
@@ -170,7 +170,7 @@ function implementEvents(obj) {
     if(obj.events.unlock.onclone) {
 
         obj.on("clone",function(){
-            emulatorInstance.currentGame.lives++;
+            emulatorInstance.phsim.setLock(dynObject,false);
         });
         
     }
@@ -178,7 +178,7 @@ function implementEvents(obj) {
     if(obj.events.unlock.onboundsout) {
 
         obj.on("boundsout",function(){
-            emulatorInstance.currentGame.lives++;
+            emulatorInstance.phsim.setLock(dynObject,false);
         });
         
     }

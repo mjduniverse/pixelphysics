@@ -73,7 +73,8 @@ function load() {
             }
     
         }
- 
+
+
         // Get level information
     
         self.levels = [];
@@ -260,6 +261,20 @@ function load() {
             }
 
         })
+    }).then(function(){
+
+        return new Promise(function(resolve,reject){
+
+            // Inbuilt Graphics
+
+            for(let i = 1; i <= 35; i++) {
+                
+                
+
+            }
+
+        });
+
     })
 
   
