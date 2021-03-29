@@ -243,32 +243,6 @@ PPGSploderEmulator.parseVectorSet = function(str) {
 
 }
 
-PPGSploderEmulator.decodePassthrough = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 0) {
-        return  "A"
-    }
-
-    if(n === 1) {
-        return "B"
-    }
-
-    if(n === 2) {
-        return "C"
-    }
-
-    if(n === 3) {
-        return "D"
-    }
-
-    if(n === 4) {
-        return "E"
-    }
-    
-}
-
 PPGSploderEmulator.prototype.renderGradient = function() {
     this.phsim.ctx.fillStyle = this.grad;
     this.phsim.ctx.fillRect(0 - this.phsim.camera.x,0 - this.phsim.camera.y,this.phsim.width / this.phsim.camera.scale,this.phsim.height / this.phsim.camera.scale);              
@@ -353,28 +327,6 @@ PPGSploderEmulator.decodeEvents = function(n) {
         }
 
     }
-}
-
-PPGSploderEmulator.decodeStrength = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 21) {
-        return "unbreakable";
-    }
-
-    if(n === 22) {
-        return "barely_breakable";
-    }
-
-    if(n === 23) {
-        return "average";
-    }
-
-    if(n === 24) {
-        return "brittle";
-    }
-
 }
 
 PPGSploderEmulator.decodeColor = function(v) {
