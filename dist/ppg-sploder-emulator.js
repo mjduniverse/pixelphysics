@@ -237,7 +237,9 @@ module.exports = createPhSimDynObject;
 /***/ }),
 
 /***/ 813:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const dictionary = __webpack_require__(280);
 
 /**
  * Create PhSim instance
@@ -380,9 +382,30 @@ function createPhSimInstance() {
             ppgSploderEmulator.renderGradient();  
         });
 
+        ppgSploderEmulator.phsim.on("objupdate",function(event){
+
+            var currentObj = event.target
+            var currentObjData2 = ppgSploderEmulator.currentLevel.bodyIds[currentObj.name];
+
+            if(currentObjData2 && currentObjData2.builtInGraphicOnly) {
+                this.phRender.dynamicRenderDraw({
+                    ...currentObj,
+                    strokeStyle: "white",
+                    lineWidth: 1
+                });
+            }
+
+            if(currentObjData2 && currentObjData2.built_in_graphic) {
+                this.ctx.textAlign = "center";
+                this.ctx.fillStyle = "white";
+                this.ctx.fillText(dictionary.built_in_graphics[currentObjData2.built_in_graphic],currentObj.matter.position.x,currentObj.matter.position.y);
+            }
+        })
+
         ppgSploderEmulator.phsim.on("afterupdate",function(event){
             ppgSploderEmulator.renderGameData();
         });
+
 
         console.log(this.objUniverse);
 
@@ -549,19 +572,42 @@ module.exports = createDescDiv;
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"}}');
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
 
 /***/ }),
 
 /***/ 653:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const dictionary = __webpack_require__(280);
 
 function firstRender() {
 
     this.renderGradient(); 
 
     for(let i = 0; i < this.phsim.objUniverse.length; i++) {
-        this.phsim.phRender.dynamicRenderDraw(this.phsim.objUniverse[i]);
+
+        let currentObj = this.phsim.objUniverse[i];
+        let currentObjData2 = this.currentLevel.bodyIds[currentObj.name];
+
+        if(currentObjData2 && currentObjData2.builtInGraphicOnly) {
+            this.phsim.phRender.dynamicRenderDraw({
+                ...currentObj,
+                strokeStyle: "white",
+                lineWidth: 1
+            });
+        }
+
+        else {
+            this.phsim.phRender.dynamicRenderDraw(currentObj);
+        }
+
+        if(currentObjData2 && currentObjData2.built_in_graphic) {
+            this.phsim.ctx.textAlign = "center";
+            this.phsim.ctx.fillStyle = "white";
+            this.phsim.ctx.fillText(dictionary.built_in_graphics[currentObjData2.built_in_graphic],currentObj.matter.position.x,currentObj.matter.position.y);
+        }
+        
     }
 
     this.renderGameData();
@@ -759,6 +805,43 @@ function implementEvents(obj) {
         });
         
     }
+
+    // remove
+
+    if(obj.events.remove.onsensor) {
+
+        let f = function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.remove.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+
+    }
+
+    if(obj.events.remove.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+        
+    }
+
+    if(obj.events.remove.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+        
+    }
+
 
     this.phsim.on("collisionstart",function(){
         if(this.inSensorCollision(dynObject)) {
@@ -1029,6 +1112,8 @@ function incrementLevel() {
             reject()
         }
         
+    }).catch(function(o){
+        console.error(o)
     });
 
 }
@@ -1236,6 +1321,14 @@ PPGSploderEmulator.decodeShapeType = function(n) {
     }
 
 }
+
+/**
+ * 
+ * @param {*} str 
+ * @returns 
+ */
+
+
 
 /**
  * Convert vector from string form to JavaScript object form
@@ -1474,6 +1567,8 @@ PPGSploderEmulator.prototype.extractObject = function(dataStr) {
         texture: a[27],
     }
 
+    o.builtInGraphicOnly = o.built_in_graphic && (o.stroke === "transparent") && (o.fill === "transparent")
+
     this.objectIds[o.id] = o;
 
     o.phSimStaticObj = this.createPhSimDynObject(o);
@@ -1648,6 +1743,12 @@ PPGSploderEmulator.prototype.firstRender = __webpack_require__(653);
 PPGSploderEmulator.prototype.createDescDiv = __webpack_require__(942);
 PPGSploderEmulator.prototype.incrementLevel = __webpack_require__(554);
 
+// Check for chrome extension
+
+if(chrome && chrome.extension) {
+    window.PPGSploderEmulator = PPGSploderEmulator;
+}
+
 /***/ }),
 
 /***/ 169:
@@ -1728,7 +1829,8 @@ function load() {
             }
     
         }
- 
+
+
         // Get level information
     
         self.levels = [];
@@ -1915,9 +2017,10 @@ function load() {
             }
 
         })
+    }).catch(function(o){
+        console.error(o);
     })
-
-  
+ 
 }
 
 module.exports = load;
@@ -1980,6 +2083,8 @@ function setLevel(level) {
     let topClr = this.currentLevel.gradient.top;
     let botClr = this.currentLevel.gradient.bottom;
 
+    // Gradient
+
     let grad = this.phsim.ctx.createLinearGradient(0,0,0,this.phsim.canvas.height);
 
     grad.addColorStop(0,topClr);
@@ -2007,7 +2112,9 @@ function setLevel(level) {
                 var o = self;
 
                 return function() {
-                    o.updatePhSimSprite(obj.sprite)
+                    if(o.playing) {
+                        o.updatePhSimSprite(obj.sprite)
+                    }
                 }
 
             }

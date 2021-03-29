@@ -1,3 +1,5 @@
+const dictionary = require("./dictionary.json");
+
 /**
  * Create PhSim instance
  * 
@@ -139,9 +141,30 @@ function createPhSimInstance() {
             ppgSploderEmulator.renderGradient();  
         });
 
+        ppgSploderEmulator.phsim.on("objupdate",function(event){
+
+            var currentObj = event.target
+            var currentObjData2 = ppgSploderEmulator.currentLevel.bodyIds[currentObj.name];
+
+            if(currentObjData2 && currentObjData2.builtInGraphicOnly) {
+                this.phRender.dynamicRenderDraw({
+                    ...currentObj,
+                    strokeStyle: "white",
+                    lineWidth: 1
+                });
+            }
+
+            if(currentObjData2 && currentObjData2.built_in_graphic) {
+                this.ctx.textAlign = "center";
+                this.ctx.fillStyle = "white";
+                this.ctx.fillText(dictionary.built_in_graphics[currentObjData2.built_in_graphic],currentObj.matter.position.x,currentObj.matter.position.y);
+            }
+        })
+
         ppgSploderEmulator.phsim.on("afterupdate",function(event){
             ppgSploderEmulator.renderGameData();
         });
+
 
         console.log(this.objUniverse);
 

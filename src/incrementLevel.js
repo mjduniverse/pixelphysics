@@ -21,6 +21,8 @@ function incrementLevel() {
             reject()
         }
         
+    }).catch(function(o){
+        console.error(o)
     });
 
 }

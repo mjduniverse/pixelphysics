@@ -397,66 +397,6 @@ PPGSploderEmulator.decodeColor = function(v) {
 
 }
 
-// 11111#x:y#0:0#angle#0#shape;rad_x;rad_y;shape_custom_path;movement_constraints;material;strength;lock_movement;collision;passthru;sensor;fill;stroke;graphic;overlap_layer;1;scribble;events;0;0;0;0;texture_settings
-
-/**
- * Parse object data to create object.
- * @param {string} dataStr -  String representing object 
- */
-
-PPGSploderEmulator.prototype.extractObject = function(dataStr) {
-
-    var a = dataStr.split(/#|;/);
-
-    var o = {
-        bodyData: dataStr,
-        id: Number.parseFloat(a[0]),
-        center: PPGSploderEmulator.parseVector(a[1]),
-        axis: PPGSploderEmulator.parseVector(a[2]),
-        angle: Number.parseFloat(a[3]),
-        group: Number.parseInt(a[4]),
-        shape: dictionary.shapes[a[5]],
-        width: Number.parseFloat(a[6]),
-        height: Number.parseFloat(a[7]),
-        path: PPGSploderEmulator.parseVectorSet(a[8]),
-        constraints: dictionary.constraints[a[9]],
-        material: dictionary.material[a[10]],
-        strength: dictionary.strength[a[11]],
-        lock: !!Number.parseInt(a[12]),
-        collisionBitField: a[13],
-        collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
-        passthru: PPGSploderEmulator.decodePassthrough(a[14]),
-        sensorBitField: a[15],
-        sensor: PPGSploderEmulator.decodeSensorLayers(a[15]),
-        fill: PPGSploderEmulator.decodeColor(a[16]),
-        stroke: PPGSploderEmulator.decodeColor(a[17]),
-        built_in_graphic: Number.parseInt(a[18]),
-        overlap_layer: Number.parseInt(a[19]),
-        transparent: !Number.parseInt(a[20]),
-        scribble: !!Number.parseInt(a[21]),
-        events: PPGSploderEmulator.decodeEvents(a[22]),
-        graphic: Number.parseInt(a[23]),
-        texture: a[27],
-    }
-
-    this.objectIds[o.id] = o;
-
-    o.phSimStaticObj = this.createPhSimDynObject(o);
-
-    o.eventStack = {
-        sensor: [],
-        crush: [],
-        clone: [],
-        boundsout: []
-    }
-
-    o.simulationEventStack = o.eventStack;
-
-    Object.assign(o,PhSim.PhSimEventTarget);
-
-    return o;
-
-}
 
 /**
  * Get XML Tree for project
@@ -604,7 +544,7 @@ window.addEventListener("load",function(){
 PPGSploderEmulator.prototype.load = require("./load");
 PPGSploderEmulator.prototype.createPhSimInstance = require("./createPhSimInstance");
 PPGSploderEmulator.prototype.createPhSimDynObject = require("./createPhSimDynObject")
-PPGSploderEmulator.decodeExtensions = require("./decodeExtensions")
+PPGSploderEmulator.decodeExtensions = require("./decodeExtensions");
 PPGSploderEmulator.prototype.implementExtensions = require("./implementExtensions");
 PPGSploderEmulator.prototype.implementEvents = require("./implementEvents");
 PPGSploderEmulator.prototype.renderGameData = require("./renderGameData");
@@ -612,3 +552,10 @@ PPGSploderEmulator.prototype.setLevel = require("./setLevel");
 PPGSploderEmulator.prototype.firstRender = require("./firstRender");
 PPGSploderEmulator.prototype.createDescDiv = require("./descDiv");
 PPGSploderEmulator.prototype.incrementLevel = require("./incrementLevel");
+PPGSploderEmulator.prototype.extractObject = require("./extractObject");
+
+// Check for chrome extension
+
+if(chrome && chrome.extension) {
+    window.PPGSploderEmulator = PPGSploderEmulator;
+}

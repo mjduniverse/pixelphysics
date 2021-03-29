@@ -183,6 +183,43 @@ function implementEvents(obj) {
         
     }
 
+    // remove
+
+    if(obj.events.remove.onsensor) {
+
+        let f = function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        };
+
+        obj.on("sensor",f);
+
+    }
+
+    if(obj.events.remove.oncrush) {
+        
+        obj.on("crush",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+
+    }
+
+    if(obj.events.remove.onclone) {
+
+        obj.on("clone",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+        
+    }
+
+    if(obj.events.remove.onboundsout) {
+
+        obj.on("boundsout",function(){
+            emulatorInstance.phsim.removeDynObj(dynObject);
+        });
+        
+    }
+
+
     this.phsim.on("collisionstart",function(){
         if(this.inSensorCollision(dynObject)) {
             obj.callEventClass("sensor",emulatorInstance,{});

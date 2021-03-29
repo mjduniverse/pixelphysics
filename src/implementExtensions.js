@@ -171,6 +171,14 @@ function implementExtensions(levelObject) {
 
         }
 
+        // Implement Elevator
+
+        if(o.extension.elevator) {
+
+            
+
+        }
+
         // Implement slider
 
         if(o.extension === "slider") {

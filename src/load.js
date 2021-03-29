@@ -261,23 +261,10 @@ function load() {
             }
 
         })
-    }).then(function(){
-
-        return new Promise(function(resolve,reject){
-
-            // Inbuilt Graphics
-
-            for(let i = 1; i <= 35; i++) {
-                
-                
-
-            }
-
-        });
-
+    }).catch(function(o){
+        console.error(o);
     })
-
-  
+ 
 }
 
 module.exports = load;

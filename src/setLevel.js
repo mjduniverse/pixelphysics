@@ -29,6 +29,8 @@ function setLevel(level) {
     let topClr = this.currentLevel.gradient.top;
     let botClr = this.currentLevel.gradient.bottom;
 
+    // Gradient
+
     let grad = this.phsim.ctx.createLinearGradient(0,0,0,this.phsim.canvas.height);
 
     grad.addColorStop(0,topClr);
@@ -56,7 +58,9 @@ function setLevel(level) {
                 var o = self;
 
                 return function() {
-                    o.updatePhSimSprite(obj.sprite)
+                    if(o.playing) {
+                        o.updatePhSimSprite(obj.sprite)
+                    }
                 }
 
             }

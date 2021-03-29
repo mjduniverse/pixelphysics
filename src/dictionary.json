@@ -62,5 +62,25 @@
         "19": "antigravity",
         "21": "magnet",
         "51": "bouncy"
+    },
+
+    "built_in_graphics": {
+        "14": "One Eye",
+        "15": "Two Eyes",
+        "16": "Baddie",
+        "17": "Player",
+        "18": "Grass Platform",
+        "19": "Question Mark",
+        "20": "Dollar Sign",
+        "21": "Spikes",
+        "22": "Star",
+        "24": "Checker Pattern",
+        "26": "Gear",
+        "27": "Ice Platform",
+        "32": "Key",
+        "33": "Coin",
+        "34": "Bomb",
+        "35": "Skull"
     }
+
 }
