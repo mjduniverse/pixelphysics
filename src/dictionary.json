@@ -64,6 +64,14 @@
         "51": "bouncy"
     },
 
+    "passthrough_layers": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+    ],
+
     "built_in_graphics": {
         "14": "One Eye",
         "15": "Two Eyes",
