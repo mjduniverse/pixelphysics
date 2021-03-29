@@ -1,4 +1,5 @@
 const PPGSploderEmulator = require("./index.js");
+const dictionary = require("./dictionary.json");
 
 /**
  * Parse object data to create object.
@@ -28,7 +29,7 @@ function extractObject(dataStr) {
         lock: !!Number.parseInt(a[12]),
         collisionBitField: a[13],
         collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
-        passthru: PPGSploderEmulator.decodePassthrough(a[14]),
+        passthru: dictionary.passthrough_layers[a[14]],
         sensorBitField: a[15],
         sensor: PPGSploderEmulator.decodeSensorLayers(a[15]),
         fill: PPGSploderEmulator.decodeColor(a[16]),
