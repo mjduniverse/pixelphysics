@@ -68,57 +68,6 @@ PPGSploderEmulator.u5bitfieldDecode = function(bitfield) {
 
 }
 
-/**
- * Decode material
- * @param {Number} n - Material number
- * @returns {String} - String naming the material 
- */
-
-PPGSploderEmulator.decodeMaterial = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 17) {
-        return "wood";
-    }
-
-    if(n === 16) {
-        return "steel"
-    }
-
-    if(n === 15) {
-        return "ice";
-    }
-
-    if(n === 14) {
-        return "rubber"
-    }
-
-    if(n === 13) {
-        return "glass";
-    }
-
-    if(n === 12) {
-        return "tire"
-    }
-    
-    if(n === 18) {
-        return "nogravity"
-    }
-
-    if(n === 19) {
-        return "antigravity"
-    }
-
-    if(n === 21) {
-        return "magnet"
-    }
-
-    if(n === 51) {
-        return "bouncy"
-    }
-}
-
 PPGSploderEmulator.decodeSensorLayers = function(bitfield) {
 
     bitfield = PPGSploderEmulator.u5bitfieldDecode(bitfield)
@@ -132,67 +81,6 @@ PPGSploderEmulator.decodeSensorLayers = function(bitfield) {
     }
 }
 
-
-
-PPGSploderEmulator.decodeConstraints = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 11) {
-        return null
-    }
-
-    if(n === 10) {
-        return "axis"
-    }
-
-    if(n === 9) {
-        return "no_rotation"
-    }
-
-    if(n === 8) {
-        return "lock"
-    }
-}
-
-
-/**
- * Decode shape type
- */
-
-PPGSploderEmulator.decodeShapeType = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 6) {
-        return "circle"
-    }
-
-    if(n === 7) {
-        return "square"
-    }
-
-    if(n === 4) {
-        return "rectangle"
-    }
-
-    if(n === 5) {
-        return "right_angle_triangle"
-    }
-
-    if(n === 3) {
-        return "pentagon"
-    }
-
-    if(n === 2) {
-        return "hexagon"
-    }
-
-    if(n === 1) {
-        return "custom_polygon"
-    }
-
-}
 
 /**
  * 
@@ -444,15 +332,6 @@ PPGSploderEmulator.prototype.updatePhSimSprite = function(spriteObj) {
 
 }
 
-PPGSploderEmulator.prototype.updateAllPhSimSprites = function() {
-    for(var i = 0; i < this.phsim.objUniverse.length; i++) {
-        if(this.phsim.objUniverse[i].sprite) {
-            this.updatePhSimSprite(this.phsim.objUniverse[i].sprite);
-        }
-    }
-}
-
-
 const PPG_INFO = "This is a game made with Sploder's physics game creator."
 
 window.addEventListener("load",function(){
@@ -505,6 +384,7 @@ PPGSploderEmulator.prototype.firstRender = require("./firstRender");
 PPGSploderEmulator.prototype.createDescDiv = require("./descDiv");
 PPGSploderEmulator.prototype.incrementLevel = require("./incrementLevel");
 PPGSploderEmulator.prototype.extractObject = require("./extractObject");
+PPGSploderEmulator.prototype.renderExtensions = require("./renderExtensions");
 
 // Check for chrome extension
 

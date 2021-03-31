@@ -32,6 +32,71 @@ function implementExtensions(levelObject) {
                 opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
             }
 
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
+
+        }
+
+        // Implement tight spring
+
+        if(o.extension === "spring_t") {
+
+            let opts = {
+                pointA: o.pointA,
+                pointB: o.pointB,
+                stiffness: 0.5,
+            }
+
+            if(bodyA) {
+                opts.bodyA = emulatorInstance.phsim.getObjectByName(o.objectA).matter;
+            }
+
+            if(bodyB) {
+                opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
+            }
+
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
+
+        }
+
+        // Implement loose spring
+
+        if(o.extension === "spring_l") {
+
+            let opts = {
+                pointA: o.pointA,
+                pointB: o.pointB,
+                stiffness: 0.2,
+            }
+
+            if(bodyA) {
+                opts.bodyA = emulatorInstance.phsim.getObjectByName(o.objectA).matter;
+            }
+
+            if(bodyB) {
+                opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
+            }
+
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
             Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
 
         }
@@ -62,6 +127,50 @@ function implementExtensions(levelObject) {
             }
 
             emulatorInstance.phsim.on("click",f());
+
+        }
+
+        // Implement Dragger
+
+        if(o.extension === "dragger") {
+
+            var f = function() {
+
+                var obj = bodyA;
+                var dynObject = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+                return function() {
+
+                    var x = emulatorInstance.phsim.mouseX / emulatorInstance.phsim.camera.scale;
+                    var y = emulatorInstance.phsim.mouseY / emulatorInstance.phsim.camera.scale
+
+                    if(emulatorInstance.phsim.pointInObject(dynObject,x,y)) {
+
+                        var c = Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create({
+                            
+                            bodyA: dynObject.matter,
+
+                            pointB: {
+                                x: x,
+                                y: y
+                            }
+
+                        }));
+
+                        var _onmousemove = function() {
+
+                        }
+
+                        var _onmouseup = function() {
+
+                        }
+
+                    }
+
+                }
+            }
+
+            emulatorInstance.phsim.on("mousedown",f());
 
         }
 
@@ -121,6 +230,14 @@ function implementExtensions(levelObject) {
                 }
 
             })());
+
+        }
+
+        // Implement Grove
+
+        if(o.extension === "grove") {
+
+
 
         }
 

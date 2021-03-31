@@ -1,8 +1,8 @@
-This is PPG Sploder Emulator. It is used to run games on Sploder created with the Physics Puzzle Creator.
+Pixelphysics is an emulator that plays games that were created by Sploder.com's Physics Puzzle Creator.
 
 ### Not a port
 
-This is not a port of the Physics engine of the PPG engine. It does not use any code that was orginally used in the physics creator engine. Rather, it merely emulates.
+This is not a port of the Physics engine of the PPG engine. It does not use any code that was orginally used in the physics creator engine. Rather, it merely emulates by parsing the XML data for a game and runs the results using Matter.js and PhSim.
 
 ### On music and inbuilt graphics
 

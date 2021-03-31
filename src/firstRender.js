@@ -4,6 +4,8 @@ function firstRender() {
 
     this.renderGradient(); 
 
+    this.renderExtensions();
+
     for(let i = 0; i < this.phsim.objUniverse.length; i++) {
 
         let currentObj = this.phsim.objUniverse[i];

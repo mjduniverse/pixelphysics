@@ -379,7 +379,8 @@ function createPhSimInstance() {
     this.phsim.on("beforefirstslupdate",function(e){
 
         ppgSploderEmulator.phsim.on("aftercanvasclear",function(e){
-            ppgSploderEmulator.renderGradient();  
+            ppgSploderEmulator.renderGradient();
+            ppgSploderEmulator.renderExtensions();  
         });
 
         ppgSploderEmulator.phsim.on("objupdate",function(event){
@@ -572,7 +573,80 @@ module.exports = createDescDiv;
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"passthrough_layers":["A","B","C","D","E"],"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
+
+/***/ }),
+
+/***/ 290:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const PPGSploderEmulator = __webpack_require__(138);
+const dictionary = __webpack_require__(280);
+
+/**
+ * Parse object data to create object.
+ * @param {string} dataStr -  String representing object
+ * @function
+ * @memberof 
+ */
+
+function extractObject(dataStr) {
+
+    var a = dataStr.split(/#|;/);
+
+    var o = {
+        bodyData: dataStr,
+        id: Number.parseFloat(a[0]),
+        center: PPGSploderEmulator.parseVector(a[1]),
+        axis: PPGSploderEmulator.parseVector(a[2]),
+        angle: Number.parseFloat(a[3]),
+        group: Number.parseInt(a[4]),
+        shape: dictionary.shapes[a[5]],
+        width: Number.parseFloat(a[6]),
+        height: Number.parseFloat(a[7]),
+        path: PPGSploderEmulator.parseVectorSet(a[8]),
+        constraints: dictionary.constraints[a[9]],
+        material: dictionary.material[a[10]],
+        strength: dictionary.strength[a[11]],
+        lock: !!Number.parseInt(a[12]),
+        collisionBitField: a[13],
+        collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
+        passthru: dictionary.passthrough_layers[a[14]],
+        sensorBitField: a[15],
+        sensor: PPGSploderEmulator.decodeSensorLayers(a[15]),
+        fill: PPGSploderEmulator.decodeColor(a[16]),
+        stroke: PPGSploderEmulator.decodeColor(a[17]),
+        built_in_graphic: Number.parseInt(a[18]),
+        overlap_layer: Number.parseInt(a[19]),
+        transparent: !Number.parseInt(a[20]),
+        scribble: !!Number.parseInt(a[21]),
+        events: PPGSploderEmulator.decodeEvents(a[22]),
+        graphic: Number.parseInt(a[23]),
+        texture: a[27],
+    }
+
+    o.builtInGraphicOnly = o.built_in_graphic && (o.stroke === "transparent") && (o.fill === "transparent")
+
+    this.objectIds[o.id] = o;
+
+    o.phSimStaticObj = this.createPhSimDynObject(o);
+
+    o.eventStack = {
+        sensor: [],
+        crush: [],
+        clone: [],
+        boundsout: []
+    }
+
+    o.simulationEventStack = o.eventStack;
+
+    Object.assign(o,PhSim.PhSimEventTarget);
+
+    return o;
+
+}
+
+module.exports = extractObject;
 
 /***/ }),
 
@@ -584,6 +658,8 @@ const dictionary = __webpack_require__(280);
 function firstRender() {
 
     this.renderGradient(); 
+
+    this.renderExtensions();
 
     for(let i = 0; i < this.phsim.objUniverse.length; i++) {
 
@@ -892,6 +968,71 @@ function implementExtensions(levelObject) {
                 opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
             }
 
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
+
+        }
+
+        // Implement tight spring
+
+        if(o.extension === "spring_t") {
+
+            let opts = {
+                pointA: o.pointA,
+                pointB: o.pointB,
+                stiffness: 0.5,
+            }
+
+            if(bodyA) {
+                opts.bodyA = emulatorInstance.phsim.getObjectByName(o.objectA).matter;
+            }
+
+            if(bodyB) {
+                opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
+            }
+
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
+
+        }
+
+        // Implement loose spring
+
+        if(o.extension === "spring_l") {
+
+            let opts = {
+                pointA: o.pointA,
+                pointB: o.pointB,
+                stiffness: 0.2,
+            }
+
+            if(bodyA) {
+                opts.bodyA = emulatorInstance.phsim.getObjectByName(o.objectA).matter;
+            }
+
+            if(bodyB) {
+                opts.bodyB = emulatorInstance.phsim.getObjectByName(o.objectB).matter;
+            }
+
+            else {
+                opts.pointB = {
+                    x: opts.pointB.x + bodyA.center.x,
+                    y: opts.pointB.y + bodyA.center.y
+                }
+            }
+
             Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,Matter.Constraint.create(opts));
 
         }
@@ -984,6 +1125,14 @@ function implementExtensions(levelObject) {
 
         }
 
+        // Implement Grove
+
+        if(o.extension === "grove") {
+
+
+
+        }
+
         // Implement mover
 
         if(o.extension === "mover") {
@@ -1028,6 +1177,14 @@ function implementExtensions(levelObject) {
                 }
 
             })());
+
+        }
+
+        // Implement Elevator
+
+        if(o.extension.elevator) {
+
+            
 
         }
 
@@ -1196,57 +1353,6 @@ PPGSploderEmulator.u5bitfieldDecode = function(bitfield) {
 
 }
 
-/**
- * Decode material
- * @param {Number} n - Material number
- * @returns {String} - String naming the material 
- */
-
-PPGSploderEmulator.decodeMaterial = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 17) {
-        return "wood";
-    }
-
-    if(n === 16) {
-        return "steel"
-    }
-
-    if(n === 15) {
-        return "ice";
-    }
-
-    if(n === 14) {
-        return "rubber"
-    }
-
-    if(n === 13) {
-        return "glass";
-    }
-
-    if(n === 12) {
-        return "tire"
-    }
-    
-    if(n === 18) {
-        return "nogravity"
-    }
-
-    if(n === 19) {
-        return "antigravity"
-    }
-
-    if(n === 21) {
-        return "magnet"
-    }
-
-    if(n === 51) {
-        return "bouncy"
-    }
-}
-
 PPGSploderEmulator.decodeSensorLayers = function(bitfield) {
 
     bitfield = PPGSploderEmulator.u5bitfieldDecode(bitfield)
@@ -1260,67 +1366,6 @@ PPGSploderEmulator.decodeSensorLayers = function(bitfield) {
     }
 }
 
-
-
-PPGSploderEmulator.decodeConstraints = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 11) {
-        return null
-    }
-
-    if(n === 10) {
-        return "axis"
-    }
-
-    if(n === 9) {
-        return "no_rotation"
-    }
-
-    if(n === 8) {
-        return "lock"
-    }
-}
-
-
-/**
- * Decode shape type
- */
-
-PPGSploderEmulator.decodeShapeType = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 6) {
-        return "circle"
-    }
-
-    if(n === 7) {
-        return "square"
-    }
-
-    if(n === 4) {
-        return "rectangle"
-    }
-
-    if(n === 5) {
-        return "right_angle_triangle"
-    }
-
-    if(n === 3) {
-        return "pentagon"
-    }
-
-    if(n === 2) {
-        return "hexagon"
-    }
-
-    if(n === 1) {
-        return "custom_polygon"
-    }
-
-}
 
 /**
  * 
@@ -1369,32 +1414,6 @@ PPGSploderEmulator.parseVectorSet = function(str) {
         });
     }
 
-}
-
-PPGSploderEmulator.decodePassthrough = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 0) {
-        return  "A"
-    }
-
-    if(n === 1) {
-        return "B"
-    }
-
-    if(n === 2) {
-        return "C"
-    }
-
-    if(n === 3) {
-        return "D"
-    }
-
-    if(n === 4) {
-        return "E"
-    }
-    
 }
 
 PPGSploderEmulator.prototype.renderGradient = function() {
@@ -1483,28 +1502,6 @@ PPGSploderEmulator.decodeEvents = function(n) {
     }
 }
 
-PPGSploderEmulator.decodeStrength = function(n) {
-
-    n = Number.parseInt(n);
-
-    if(n === 21) {
-        return "unbreakable";
-    }
-
-    if(n === 22) {
-        return "barely_breakable";
-    }
-
-    if(n === 23) {
-        return "average";
-    }
-
-    if(n === 24) {
-        return "brittle";
-    }
-
-}
-
 PPGSploderEmulator.decodeColor = function(v) {
 
     v = Number.parseInt(v);
@@ -1525,68 +1522,6 @@ PPGSploderEmulator.decodeColor = function(v) {
 
 }
 
-// 11111#x:y#0:0#angle#0#shape;rad_x;rad_y;shape_custom_path;movement_constraints;material;strength;lock_movement;collision;passthru;sensor;fill;stroke;graphic;overlap_layer;1;scribble;events;0;0;0;0;texture_settings
-
-/**
- * Parse object data to create object.
- * @param {string} dataStr -  String representing object 
- */
-
-PPGSploderEmulator.prototype.extractObject = function(dataStr) {
-
-    var a = dataStr.split(/#|;/);
-
-    var o = {
-        bodyData: dataStr,
-        id: Number.parseFloat(a[0]),
-        center: PPGSploderEmulator.parseVector(a[1]),
-        axis: PPGSploderEmulator.parseVector(a[2]),
-        angle: Number.parseFloat(a[3]),
-        group: Number.parseInt(a[4]),
-        shape: dictionary.shapes[a[5]],
-        width: Number.parseFloat(a[6]),
-        height: Number.parseFloat(a[7]),
-        path: PPGSploderEmulator.parseVectorSet(a[8]),
-        constraints: dictionary.constraints[a[9]],
-        material: dictionary.material[a[10]],
-        strength: dictionary.strength[a[11]],
-        lock: !!Number.parseInt(a[12]),
-        collisionBitField: a[13],
-        collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
-        passthru: PPGSploderEmulator.decodePassthrough(a[14]),
-        sensorBitField: a[15],
-        sensor: PPGSploderEmulator.decodeSensorLayers(a[15]),
-        fill: PPGSploderEmulator.decodeColor(a[16]),
-        stroke: PPGSploderEmulator.decodeColor(a[17]),
-        built_in_graphic: Number.parseInt(a[18]),
-        overlap_layer: Number.parseInt(a[19]),
-        transparent: !Number.parseInt(a[20]),
-        scribble: !!Number.parseInt(a[21]),
-        events: PPGSploderEmulator.decodeEvents(a[22]),
-        graphic: Number.parseInt(a[23]),
-        texture: a[27],
-    }
-
-    o.builtInGraphicOnly = o.built_in_graphic && (o.stroke === "transparent") && (o.fill === "transparent")
-
-    this.objectIds[o.id] = o;
-
-    o.phSimStaticObj = this.createPhSimDynObject(o);
-
-    o.eventStack = {
-        sensor: [],
-        crush: [],
-        clone: [],
-        boundsout: []
-    }
-
-    o.simulationEventStack = o.eventStack;
-
-    Object.assign(o,PhSim.PhSimEventTarget);
-
-    return o;
-
-}
 
 /**
  * Get XML Tree for project
@@ -1682,15 +1617,6 @@ PPGSploderEmulator.prototype.updatePhSimSprite = function(spriteObj) {
 
 }
 
-PPGSploderEmulator.prototype.updateAllPhSimSprites = function() {
-    for(var i = 0; i < this.phsim.objUniverse.length; i++) {
-        if(this.phsim.objUniverse[i].sprite) {
-            this.updatePhSimSprite(this.phsim.objUniverse[i].sprite);
-        }
-    }
-}
-
-
 const PPG_INFO = "This is a game made with Sploder's physics game creator."
 
 window.addEventListener("load",function(){
@@ -1734,7 +1660,7 @@ window.addEventListener("load",function(){
 PPGSploderEmulator.prototype.load = __webpack_require__(169);
 PPGSploderEmulator.prototype.createPhSimInstance = __webpack_require__(813);
 PPGSploderEmulator.prototype.createPhSimDynObject = __webpack_require__(476)
-PPGSploderEmulator.decodeExtensions = __webpack_require__(526)
+PPGSploderEmulator.decodeExtensions = __webpack_require__(526);
 PPGSploderEmulator.prototype.implementExtensions = __webpack_require__(254);
 PPGSploderEmulator.prototype.implementEvents = __webpack_require__(785);
 PPGSploderEmulator.prototype.renderGameData = __webpack_require__(28);
@@ -1742,6 +1668,8 @@ PPGSploderEmulator.prototype.setLevel = __webpack_require__(574);
 PPGSploderEmulator.prototype.firstRender = __webpack_require__(653);
 PPGSploderEmulator.prototype.createDescDiv = __webpack_require__(942);
 PPGSploderEmulator.prototype.incrementLevel = __webpack_require__(554);
+PPGSploderEmulator.prototype.extractObject = __webpack_require__(290);
+PPGSploderEmulator.prototype.renderExtensions = __webpack_require__(491);
 
 // Check for chrome extension
 
@@ -2024,6 +1952,33 @@ function load() {
 }
 
 module.exports = load;
+
+/***/ }),
+
+/***/ 491:
+/***/ ((module) => {
+
+function renderExtensions() {
+
+    this.phsim.ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    this.phsim.ctx.lineWidth = 10;
+
+    for(var i = 0; i < this.phsim.matterJSWorld.constraints.length; i++) {
+        
+        let constraint = this.phsim.matterJSWorld.constraints[i];
+        let pointA = Matter.Constraint.pointAWorld(constraint);
+        let pointB = Matter.Constraint.pointBWorld(constraint);
+
+
+        this.phsim.ctx.moveTo(pointA.x,pointA.y);
+        this.phsim.ctx.lineTo(pointB.x,pointB.y);
+
+        this.phsim.ctx.stroke();
+
+    }
+}
+
+module.exports = renderExtensions;
 
 /***/ }),
 

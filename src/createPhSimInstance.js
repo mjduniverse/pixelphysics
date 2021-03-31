@@ -138,7 +138,8 @@ function createPhSimInstance() {
     this.phsim.on("beforefirstslupdate",function(e){
 
         ppgSploderEmulator.phsim.on("aftercanvasclear",function(e){
-            ppgSploderEmulator.renderGradient();  
+            ppgSploderEmulator.renderGradient();
+            ppgSploderEmulator.renderExtensions();  
         });
 
         ppgSploderEmulator.phsim.on("objupdate",function(event){
