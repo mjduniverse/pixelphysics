@@ -237,9 +237,150 @@ function implementExtensions(levelObject) {
 
         if(o.extension === "grove") {
 
-
-
         }
+
+        if(o.extension === "elevator") {
+
+            emulatorInstance.elevators = emulatorInstance.elevators || []; 
+
+            
+            let e = {
+                x1: o.pointA.x + bodyA.center.x,
+                y1: o.pointA.y + bodyA.center.y,
+                x2: o.pointB.x + bodyA.center.x,
+                y2: o.pointB.y + bodyA.center.y
+            };
+
+            // Intersection 
+
+            let slope = (e.y1 - e.y2) / (e.x1 - e.x2);
+            let perpSlope = -1/slope;
+
+            var intersectionX;
+            var intersectionY;
+            var boundingFunction;
+
+            if(Math.abs(slope) <= 1) {
+
+                if(e.x1 > e.x2) {
+                    
+                    boundingFunction = function() {
+                        return e.x1 > c.pointB.x && c.pointB.x > e.x2;
+                    }
+
+                }
+
+                else {
+                    
+                    boundingFunction = function() {
+                        return e.x2 > c.pointB.x && c.pointB.x > e.x1;
+                    }
+
+                }
+
+            }
+
+            else {
+
+                if(e.y1 < e.y2) {
+
+                    boundingFunction = function() {
+                        return e.y1 > c.pointB.y && c.pointB.y > e.y2;
+                    }
+
+                }
+
+                else {
+
+                    boundingFunction = function() {
+                        return e.y2 > c.pointB.y && c.pointB.y > e.y1;
+                    }
+
+                }
+                
+            }
+
+            if(slope === Infinity) {
+                intersectionX = e.x1;
+                intersectionY = bodyA.center.y;
+            }
+
+            else if(slope === 0) {
+                intersectionX = bodyA.center.x;
+                intersectionY = e.y1;
+            }
+
+            else {
+
+                let yIntercept = e.y2 - slope * e.x2;
+                let perpYIntercept = bodyA.center.y - perpSlope * bodyA.center.x;
+    
+                intersectionX =  (perpYIntercept - yIntercept) / (slope - perpSlope);
+                intersectionY = intersectionX * slope + yIntercept;
+
+            }
+
+            // Unit Vector
+
+            let unitVector = PhSim.Vector.unitVector(PhSim.Vector.subtract(o.pointB,o.pointA));
+
+            // Constraint
+
+            let opts = {
+
+                bodyA: emulatorInstance.phsim.getObjectByName(o.objectA).matter,
+
+                pointB: {
+                    x: intersectionX,
+                    y: intersectionY
+                }
+
+            }
+
+            let c = Matter.Constraint.create(opts);
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,c);
+
+            // Center Constraint
+
+            let c_opts = {
+
+                bodyA: emulatorInstance.phsim.getObjectByName(o.objectA).matter,
+
+                pointB: {
+                    x: opts.bodyA.position.x,
+                    y: opts.bodyA.position.y
+                }
+
+            }
+
+            let center_c = Matter.Constraint.create(c_opts)
+
+            Matter.World.addConstraint(emulatorInstance.phsim.matterJSWorld,center_c);
+
+            emulatorInstance.elevators.push(e);
+
+            let direction = -1;
+
+            setInterval(function(){
+
+                if(emulatorInstance.playing) {
+
+                    center_c.pointB.x += unitVector.x * direction;
+                    center_c.pointB.y += unitVector.y * direction;
+
+                    c.pointB.x += unitVector.x * direction;
+                    c.pointB.y += unitVector.y * direction;
+
+                    if( boundingFunction() ) {
+                        direction = -direction;
+                    }
+
+                }
+
+            },100)
+
+        } 
 
         // Implement mover
 
@@ -285,14 +426,6 @@ function implementExtensions(levelObject) {
                 }
 
             })());
-
-        }
-
-        // Implement Elevator
-
-        if(o.extension.elevator) {
-
-            
 
         }
 
