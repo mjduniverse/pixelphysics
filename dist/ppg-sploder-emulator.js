@@ -1194,7 +1194,11 @@ function implementExtensions(levelObject) {
 
             var intersectionX;
             var intersectionY;
-            var boundingFunction;
+
+            var bounds = {
+                min: null,
+                max: null
+            }
 
             if(Math.abs(slope) <= 1) {
 
@@ -1296,9 +1300,9 @@ function implementExtensions(levelObject) {
 
             emulatorInstance.elevators.push(e);
 
-            let direction = -1;
+            let direction = -2;
 
-            setInterval(function(){
+            let f = function() {
 
                 if(emulatorInstance.playing) {
 
@@ -1308,13 +1312,15 @@ function implementExtensions(levelObject) {
                     c.pointB.x += unitVector.x * direction;
                     c.pointB.y += unitVector.y * direction;
 
-                    if( boundingFunction() ) {
+                    if( !boundingFunction() ) {
                         direction = -direction;
                     }
 
                 }
 
-            },100)
+            };
+
+            emulatorInstance.phsim.on("beforeupdate",f)
 
         } 
 
