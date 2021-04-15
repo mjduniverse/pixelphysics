@@ -950,6 +950,8 @@ function implementExtensions(levelObject) {
         let bodyA = levelObject.bodyIds[o.objectA];
         let bodyB = levelObject.bodyIds[o.objectB];
 
+
+
         // Implement pinjoint
 
         if(o.extension === "pinjoint") {
@@ -1132,6 +1134,12 @@ function implementExtensions(levelObject) {
             };
 
             bodyA.on("sensor",f())
+        }
+
+        // Switcher
+
+        if(o.extension === "switcher") {
+            bodyA.switcherEnabled = true;
         }
 
         // Implement jumper
