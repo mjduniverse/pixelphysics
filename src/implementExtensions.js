@@ -392,6 +392,19 @@ function implementExtensions(levelObject) {
 
             };
 
+            let g = function(){
+
+                if(bodyA.switcherEnabled) {
+                    direction = -direction;
+                }
+
+                
+                setTimeout(g,1000 * Math.random());
+
+            }
+
+            setTimeout(g,1000 * Math.random());
+
             emulatorInstance.phsim.on("beforeupdate",f)
 
         } 
