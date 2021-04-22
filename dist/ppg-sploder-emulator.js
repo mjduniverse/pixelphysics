@@ -451,6 +451,7 @@ function decodeExtensions(extensionData) {
     if(o.extension === "arcade_mover") {
         o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
         o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+        o.distance = Number.parseFloat(a[5]);
     }
 
     if(o.extension === "jumper") {
@@ -1439,6 +1440,100 @@ function implementExtensions(levelObject) {
 
         }
 
+
+        // Implement Arcade Mover
+
+        if(o.extension === "arcade_mover") {
+
+            // Vectors
+
+            var up = {
+                x: 0,
+                y: -o.distance,
+            }
+
+            var down = {
+                x: 0,
+                y: o.distance,
+            }
+
+            var left = {
+                x: -o.distance,
+                y: 0
+            }
+
+            var right = {
+                x: o.distance,
+                y: 0,
+            }
+
+            // Key Codes
+
+            var leftArrow = /KeyA|ArrowLeft/;
+            var rightArrow = /keyD|ArrowRight/;
+            var upArrow = /KeyW|ArrowUp/;
+            var downArrow = /keyS|ArrowDown/;
+
+            if(o.arrowKeysOnly) {
+                upArrow = "ArrowUp";
+                downArrow = "ArrowDown";
+                leftArrow = "ArrowLeft";
+                rightArrow = "ArrowRight"
+            }
+
+            if(o.wasdKeysOnly) {
+                upArrow = "KeyW";
+                downArrow = "KeyS";
+                leftArrow = "KeyA";
+                rightArrow = "KeyD";
+            }
+
+            // Keyboard Event Reference
+
+            var keyboardEvent = null;
+
+            // Reference to PhSim object
+
+            var object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+            // Function
+
+            let f = function() {
+
+                if(keyboardEvent) {
+
+                    if(keyboardEvent.code.match(leftArrow)) {
+                        PhSim.Motion.translate(object,left);
+                    }
+                    
+                    if(keyboardEvent.code.match(rightArrow)) {
+                        PhSim.Motion.translate(object,right);
+                    }
+    
+                    if(keyboardEvent.code.match(upArrow)) {
+                        PhSim.Motion.translate(object,up);
+                    }
+                    
+                    if(keyboardEvent.code.match(downArrow)) {
+                        PhSim.Motion.translate(object,down);
+                    }
+
+                }
+               
+            }
+
+            window.addEventListener("keydown",function(e){
+                keyboardEvent = e;
+                emulatorInstance.phsim.on("beforeupdate",f);
+            });
+
+            window.addEventListener("keyup",function(e) {
+                keyboardEvent = null;
+                emulatorInstance.phsim.off("beforeupdate",f);
+            });
+
+        }
+
     }
 
 }
@@ -1529,6 +1624,8 @@ function PPGSploderEmulator(xmlTree) {
 module.exports = PPGSploderEmulator;
 
 PPGSploderEmulator.prototype.objectIds = {};
+
+PPGSploderEmulator.prototype.elevators = []; 
 
 /**
  * 

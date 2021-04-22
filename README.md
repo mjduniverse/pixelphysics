@@ -7,3 +7,36 @@ This is not a port of the Physics engine of the PPG engine. It does not use any 
 ### On music and inbuilt graphics
 
 As of now, this emulator does not include the music that is used on Sploder for licensing reasons. The same goes for inbuilt graphics (such as the angry face for baddies and the smiling face for the player).
+
+### Progress
+
+* Physics
+    * Motor
+    * Bouncer
+    * Pinjoint
+    * Grove
+    * Spring-T
+    * Spring-L
+* Controls
+    * Rotator
+    * Mover (Done)
+    * Slider (Done)
+    * Jumper (Done)
+    * Arcade Mover
+    * Selector
+    * Adder
+    * Launcher
+    * Aimer
+    * Dragger
+    * Thruster
+    * Clicker
+* Widgets
+    * Elevator (Done)
+    * Spawner
+    * Connect
+    * Factory
+    * EventLink (Done)
+    * Switcher (Done)
+    * E-Magnet
+    * Pointer
+    * Propeller

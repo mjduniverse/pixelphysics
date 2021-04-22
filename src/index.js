@@ -41,6 +41,8 @@ module.exports = PPGSploderEmulator;
 
 PPGSploderEmulator.prototype.objectIds = {};
 
+PPGSploderEmulator.prototype.elevators = []; 
+
 /**
  * 
  * Decode a unsigned 5 bit field and turn it into an object.
