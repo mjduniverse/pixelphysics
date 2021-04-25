@@ -504,6 +504,20 @@ function implementExtensions(levelObject) {
         }
 
 
+        // Implement Motor
+
+        if(o.extension === "motor") {
+
+            let rate = (o.radians / 1000) * 16.666;
+            let object = emulatorInstance.phsim.getObjectByName(o.objectA);
+            let center = PhSim.Vector.add(bodyA.axis,bodyA.center);
+
+            emulatorInstance.phsim.on("afterupdate",function(){
+                Matter.Body.rotate(object.matter, rate, center)
+            });
+
+        }
+
         // Implement Arcade Mover
 
         if(o.extension === "arcade_mover") {
