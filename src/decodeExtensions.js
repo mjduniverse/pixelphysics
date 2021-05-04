@@ -22,6 +22,10 @@ function decodeExtensions(extensionData) {
         o.radians = Number.parseFloat(a[5]);
     }
 
+    if(o.extension === "rotator") {
+        o.radians = Number.parseFloat(a[5]);
+    }
+
     if(o.extension === "arcade_mover") {
         o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
         o.wasdKeysOnly = !!Number.parseFloat(a[9]);

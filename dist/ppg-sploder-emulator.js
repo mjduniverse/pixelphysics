@@ -448,6 +448,10 @@ function decodeExtensions(extensionData) {
         o.radians = Number.parseFloat(a[5]);
     }
 
+    if(o.extension === "rotator") {
+        o.radians = Number.parseFloat(a[5]);
+    }
+
     if(o.extension === "arcade_mover") {
         o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
         o.wasdKeysOnly = !!Number.parseFloat(a[9]);
@@ -574,7 +578,7 @@ module.exports = createDescDiv;
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"passthrough_layers":["A","B","C","D","E"],"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","32":"rotator","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"passthrough_layers":["A","B","C","D","E"],"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
 
 /***/ }),
 
@@ -1441,17 +1445,45 @@ function implementExtensions(levelObject) {
         }
 
 
-        // Implement Motor
+        // Implement rotator
 
-        if(o.extension === "motor") {
+        if(o.extension === "rotator") {
+
+            var leftArrow = /KeyA|ArrowLeft/;
+            var rightArrow = /keyD|ArrowRight/;
 
             let rate = (o.radians / 1000) * 16.666;
             let object = emulatorInstance.phsim.getObjectByName(o.objectA);
-            let center = PhSim.Vector.add(bodyA.axis,bodyA.center);
+            let direction = 1;
+            let enabled = false;
 
-            emulatorInstance.phsim.on("afterupdate",function(){
-                Matter.Body.rotate(object.matter, rate, center)
+            object.matter.friction = 1;
+
+            //object.matter.inertia = 0;
+            //object.matter.inverseInertia = Infinity;
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                if(enabled) {
+                    Matter.Body.setAngularVelocity(object.matter,rate * direction);
+                }
             });
+
+            let f = function(event) {
+
+                if(event.code.match(leftArrow)) {
+                    direction = -1;
+                    enabled = !enabled;
+                }
+                
+                else if(event.code.match(rightArrow)) {
+                    direction = 1;
+                    enabled = !enabled;
+                }
+                
+            }
+
+            window.addEventListener("keydown",f);
+            window.addEventListener("keyup",f);
 
         }
 

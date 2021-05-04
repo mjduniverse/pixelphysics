@@ -1,5 +1,6 @@
 {
     "extensions": {
+        "32": "rotator",
         "31": "motor",
         "25": "bouncer",
         "26": "pinjoint",

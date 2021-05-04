@@ -504,17 +504,45 @@ function implementExtensions(levelObject) {
         }
 
 
-        // Implement Motor
+        // Implement rotator
 
-        if(o.extension === "motor") {
+        if(o.extension === "rotator") {
+
+            var leftArrow = /KeyA|ArrowLeft/;
+            var rightArrow = /keyD|ArrowRight/;
 
             let rate = (o.radians / 1000) * 16.666;
             let object = emulatorInstance.phsim.getObjectByName(o.objectA);
-            let center = PhSim.Vector.add(bodyA.axis,bodyA.center);
+            let direction = 1;
+            let enabled = false;
 
-            emulatorInstance.phsim.on("afterupdate",function(){
-                Matter.Body.rotate(object.matter, rate, center)
+            object.matter.friction = 1;
+
+            //object.matter.inertia = 0;
+            //object.matter.inverseInertia = Infinity;
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                if(enabled) {
+                    Matter.Body.setAngularVelocity(object.matter,rate * direction);
+                }
             });
+
+            let f = function(event) {
+
+                if(event.code.match(leftArrow)) {
+                    direction = -1;
+                    enabled = !enabled;
+                }
+                
+                else if(event.code.match(rightArrow)) {
+                    direction = 1;
+                    enabled = !enabled;
+                }
+                
+            }
+
+            window.addEventListener("keydown",f);
+            window.addEventListener("keyup",f);
 
         }
 
