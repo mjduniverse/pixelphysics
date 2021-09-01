@@ -11,14 +11,14 @@ As of now, this emulator does not include the music that is used on Sploder for 
 ### Progress
 
 * Physics
-    * Motor
+    * Motor (Done)
     * Bouncer
-    * Pinjoint
+    * Pinjoint (Done)
     * Grove
     * Spring-T
     * Spring-L
 * Controls
-    * Rotator
+    * Rotator (Done)
     * Mover (Done)
     * Slider (Done)
     * Jumper (Done)
@@ -29,7 +29,7 @@ As of now, this emulator does not include the music that is used on Sploder for 
     * Aimer
     * Dragger
     * Thruster
-    * Clicker
+    * Clicker (Done)
 * Widgets
     * Elevator (Done)
     * Spawner

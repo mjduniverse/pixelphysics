@@ -14,7 +14,7 @@ function implementExtensions(levelObject) {
         let bodyA = levelObject.bodyIds[o.objectA];
         let bodyB = levelObject.bodyIds[o.objectB];
 
-
+        
 
         // Implement pinjoint
 
@@ -519,6 +519,23 @@ function implementExtensions(levelObject) {
 
         }
 
+        // Implement Propeller
+
+        if(o.extension === "propeller") {
+
+            let object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+            let force = {
+                x: (o.pointB.x / 1000) * 16, 
+                y: (o.pointB.y / 1000) * 16
+            }
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                Matter.Body.applyForce(object.matter,object.matter.position,force);
+            });
+
+        }
+
         // Implement rotator
 
         if(o.extension === "rotator") {
@@ -623,19 +640,19 @@ function implementExtensions(levelObject) {
                 if(keyboardEvent) {
 
                     if(keyboardEvent.code.match(leftArrow)) {
-                        PhSim.Motion.translate(object,left);
+                        PhSim.Motion.setVelocity(object,left);
                     }
                     
                     if(keyboardEvent.code.match(rightArrow)) {
-                        PhSim.Motion.translate(object,right);
+                        PhSim.Motion.setVelocity(object,right);
                     }
     
                     if(keyboardEvent.code.match(upArrow)) {
-                        PhSim.Motion.translate(object,up);
+                        PhSim.Motion.setVelocity(object,up);
                     }
                     
                     if(keyboardEvent.code.match(downArrow)) {
-                        PhSim.Motion.translate(object,down);
+                        PhSim.Motion.setVelocity(object,down);
                     }
 
                 }
@@ -648,8 +665,15 @@ function implementExtensions(levelObject) {
             });
 
             window.addEventListener("keyup",function(e) {
+                
                 keyboardEvent = null;
+
+                PhSim.Motion.setVelocity(object,{
+                    x: 0,
+                    y: 0
+                })
                 emulatorInstance.phsim.off("beforeupdate",f);
+
             });
 
         }

@@ -47,8 +47,6 @@ function extractObject(dataStr) {
 
     this.objectIds[o.id] = o;
 
-    o.phSimStaticObj = this.createPhSimDynObject(o);
-
     o.eventStack = {
         sensor: [],
         crush: [],
@@ -57,6 +55,8 @@ function extractObject(dataStr) {
     }
 
     o.simulationEventStack = o.eventStack;
+
+    o.extensions = [];
 
     Object.assign(o,PhSim.PhSimEventTarget);
 

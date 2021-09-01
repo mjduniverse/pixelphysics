@@ -118,6 +118,7 @@ function load() {
             for(let i = 0; i < bodyDataParts.length; i++) {
 
                 let body = self.extractObject(bodyDataParts[i]);
+                self.createPhSimDynObject(body);
                 
                 // Body id structure
 
