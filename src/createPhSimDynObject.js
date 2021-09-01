@@ -12,6 +12,8 @@ function createPhSimDynObject(o) {
 
     var p = {}
 
+    o.phSimStaticObj = p;
+
     // Widgets Property
 
     p.widgets = [];

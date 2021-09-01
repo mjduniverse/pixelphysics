@@ -14,7 +14,7 @@ function implementExtensions(levelObject) {
         let bodyA = levelObject.bodyIds[o.objectA];
         let bodyB = levelObject.bodyIds[o.objectB];
 
-
+        
 
         // Implement pinjoint
 
@@ -503,18 +503,78 @@ function implementExtensions(levelObject) {
 
         }
 
-
         // Implement Motor
 
         if(o.extension === "motor") {
 
             let rate = (o.radians / 1000) * 16.666;
             let object = emulatorInstance.phsim.getObjectByName(o.objectA);
-            let center = PhSim.Vector.add(bodyA.axis,bodyA.center);
+            let direction = 1;
 
-            emulatorInstance.phsim.on("afterupdate",function(){
-                Matter.Body.rotate(object.matter, rate, center)
+            object.matter.friction = 1;
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                Matter.Body.setAngularVelocity(object.matter,rate * direction);
             });
+
+        }
+
+        // Implement Propeller
+
+        if(o.extension === "propeller") {
+
+            let object = emulatorInstance.phsim.getObjectByName(o.objectA);
+
+            let force = {
+                x: (o.pointB.x / 1000) * 16, 
+                y: (o.pointB.y / 1000) * 16
+            }
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                Matter.Body.applyForce(object.matter,object.matter.position,force);
+            });
+
+        }
+
+        // Implement rotator
+
+        if(o.extension === "rotator") {
+
+            var leftArrow = /KeyA|ArrowLeft/;
+            var rightArrow = /keyD|ArrowRight/;
+
+            let rate = (o.radians / 1000) * 16.666;
+            let object = emulatorInstance.phsim.getObjectByName(o.objectA);
+            let direction = 1;
+            let enabled = false;
+
+            object.matter.friction = 1;
+
+            //object.matter.inertia = 0;
+            //object.matter.inverseInertia = Infinity;
+
+            emulatorInstance.phsim.on("beforeupdate",function(){
+                if(enabled) {
+                    Matter.Body.setAngularVelocity(object.matter,rate * direction);
+                }
+            });
+
+            let f = function(event) {
+
+                if(event.code.match(leftArrow)) {
+                    direction = -1;
+                    enabled = !enabled;
+                }
+                
+                else if(event.code.match(rightArrow)) {
+                    direction = 1;
+                    enabled = !enabled;
+                }
+                
+            }
+
+            window.addEventListener("keydown",f);
+            window.addEventListener("keyup",f);
 
         }
 
@@ -580,19 +640,19 @@ function implementExtensions(levelObject) {
                 if(keyboardEvent) {
 
                     if(keyboardEvent.code.match(leftArrow)) {
-                        PhSim.Motion.translate(object,left);
+                        PhSim.Motion.setVelocity(object,left);
                     }
                     
                     if(keyboardEvent.code.match(rightArrow)) {
-                        PhSim.Motion.translate(object,right);
+                        PhSim.Motion.setVelocity(object,right);
                     }
     
                     if(keyboardEvent.code.match(upArrow)) {
-                        PhSim.Motion.translate(object,up);
+                        PhSim.Motion.setVelocity(object,up);
                     }
                     
                     if(keyboardEvent.code.match(downArrow)) {
-                        PhSim.Motion.translate(object,down);
+                        PhSim.Motion.setVelocity(object,down);
                     }
 
                 }
@@ -605,8 +665,15 @@ function implementExtensions(levelObject) {
             });
 
             window.addEventListener("keyup",function(e) {
+                
                 keyboardEvent = null;
+
+                PhSim.Motion.setVelocity(object,{
+                    x: 0,
+                    y: 0
+                })
                 emulatorInstance.phsim.off("beforeupdate",f);
+
             });
 
         }
