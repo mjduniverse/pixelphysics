@@ -16,7 +16,7 @@ function setLevel(level) {
 
     this.currentLevel = level; 
 
-    this.currentLevelIndex = this.levels.indexOf(level);
+    this.currentLevelIndex = this.pixelPhysicsParser.levels.indexOf(level);
 
     this.descTxt.innerText = this.currentLevel.description;
     this.descDiv.style.display = "block";

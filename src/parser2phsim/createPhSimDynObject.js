@@ -8,7 +8,7 @@
  */
 
 
-function createPhSimDynObject(o) {
+function createPhSimDynObject(o,pixelPhysicsParser) {
 
     var p = {}
 
@@ -75,10 +75,10 @@ function createPhSimDynObject(o) {
     if(o.graphic) {
 
         p.sprite = {
-            src: this.graphics[o.graphic].url,
+            src: pixelPhysicsParser.graphics[o.graphic].url,
 
             data: {
-                name_key: Number.parseInt(this.graphics[o.graphic].name),
+                name_key: Number.parseInt(pixelPhysicsParser.graphics[o.graphic].name),
                 index: 0
             }
         }

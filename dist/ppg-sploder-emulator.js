@@ -1,491 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 476:
-/***/ ((module) => {
-
-/**
- * 
- * @param {Object}
- * @returns {Object}
- * 
- * @this PPGSploderEmulator
- * @memberof PPGSploderEmulator.prototype
- */
-
-
-function createPhSimDynObject(o) {
-
-    var p = {}
-
-    o.phSimStaticObj = p;
-
-    // Widgets Property
-
-    p.widgets = [];
-
-    // Collision Classes
-
-    var collisionClassArr = []
-
-    for(let i = 0; i < 5; i++) {
-        if(o.collisionLayers[i]) {
-            collisionClassArr.push(i.toString());
-        }
-    }
-
-    p.collisionClass = collisionClassArr.join(" ");
-
-    if(collisionClassArr.length === 0) {
-        p.noCollision = true;
-    }
-
-    // Name
-
-    p.name = o.id;
-
-    // Sensor Layers
-
-    var sensorClassArr = [];
-
-    if(o.sensor.ace) {
-        sensorClassArr.push("ace");
-    }
-
-    if(o.sensor.diamond) {
-        sensorClassArr.push("diamond");
-    }
-
-    if(o.sensor.heart) {
-        sensorClassArr.push("heart");
-    }
-
-    if(o.sensor.spade) {
-        sensorClassArr.push("spade");
-    }
-
-    if(o.sensor.spade) {
-        sensorClassArr.push("flower");
-    }
-
-    p.sensorClass= sensorClassArr.join(" ");
-
-    // Colors
-
-    p.fillStyle = o.fill;
-    p.strokeStyle = o.stroke;
-    p.lineWidth = 4;
-
-    // Graphics
-
-    if(o.graphic) {
-
-        p.sprite = {
-            src: this.graphics[o.graphic].url,
-
-            data: {
-                name_key: Number.parseInt(this.graphics[o.graphic].name),
-                index: 0
-            }
-        }
-
-    }
-
-    // Locks
-
-    if(o.lock || o.constraints === "lock") {
-        p.locked = true;
-    }
-
-    // No Rotation
-
-    if(o.constraints === "noRotation") {
-        p.widgets.push({
-            type: "noRotation"
-        })
-    }
-
-    // Axis Restraint
-
-    if(o.constraints === "axis") {
-        p.widgets.push({
-            type: "circularConstraint" 
-        })
-    }
-
-    if(p.cycle) {
-        p.cycle = (Math.PI/360) * (o.angle - 90);
-    }
-
-    else {
-        p.cycle = 0;
-    }
-
-    if(o.shape === "circle") {
-        p.shape = "circle";
-        p.x = o.center.x;
-        p.y = o.center.y;
-        p.radius = o.width / 2;
-        
-        if(p.sprite) {
-            p.sprite.fit = true;
-        }
-
-    }
-
-    if(o.shape === "rectangle") {
-        p.x = o.center.x - o.width * 0.5;
-        p.y = o.center.y - o.height * 0.5;
-        p.w = o.width;
-        p.h = o.height;
-        p.shape = "rectangle";
-
-        if(p.sprite) {
-            p.sprite.fit = true;
-        }
-
-    }
-
-    if(o.shape === "square") {
-        p.x = o.center.x - o.width * 0.5;
-        p.y = o.center.y - o.height * 0.5;
-        p.w = o.width;
-        p.h = o.width;
-        p.shape = "rectangle";
-
-        if(p.sprite) {
-            p.sprite.fit = true;
-        }
-
-    }
-
-    if(o.shape === "pentagon") {
-        p.shape = "regPolygon";
-        p.x = o.center.x;
-        p.y = o.center.y;
-        p.radius = o.width;
-        p.sides = 5;
-
-        if(p.sprite) {
-            p.sprite.fit = true;
-        }
-    }
-    
-    if(o.shape === "hexagon") {
-        p.shape = "regPolygon";
-        p.x = o.center.x;
-        p.y = o.center.y;
-        p.radius = o.width;
-        p.sides = 6;
- 
-        if(p.sprite) {
-            p.sprite.fit = true;
-        }
-
-    }
-
-    if(o.shape === "right_angle_triangle") {
-
-        p.shape = "polygon",
-
-        p.verts = [
-
-            {
-                x: o.center.x + 0.5 * o.width,
-                y: o.center.y - 0.5 * o.width
-            },
-
-            {
-                x: o.center.x + 0.5 * o.width,
-                y: o.center.y + 0.5 * o.width
-            },
-
-            {
-                x: o.center.x - 0.5 * o.width,
-                y: o.center.y - 0.5 * o.width
-            }
-        ]
-
-        if(p.sprite) {
-            p.sprite.repeat = true;
-        }
-
-    }
-
-    if(o.shape === "custom_polygon") {
-
-        p.shape = "polygon";
-
-        let verts = JSON.parse(JSON.stringify(o.path));
-
-        for(let i = 0; i < verts.length; i++) {
-            verts[i].x = o.center.x + verts[i].x;
-            verts[i].y = o.center.y + verts[i].y;
-        }
-
-        p.verts = verts;
-
-        //debugger;
-
-    }
-
-    return p;
-    
-
-}
-
-module.exports = createPhSimDynObject;
-
-/***/ }),
-
-/***/ 813:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const dictionary = __webpack_require__(280);
-
-/**
- * Create PhSim instance
- * 
- * @function
- * @memberof PPGSploderEmulator.prototype
- * @this PPGSploderEmulator
- */
-
-function createPhSimInstance() {
-
-    var ppgSploderEmulator = this;
-
-    var staticSim = {
-
-        simulations: [],
-
-        box: {
-            w: 640,
-            h: 480
-        }
-
-    }
-
-    for(let i = 0; i < this.levels.length; i++) {
-
-        let level = {
-
-            data: {
-                sploder: this.levels[i]
-            },
-
-            world: {},
-
-            layers: [
-                {
-                    objUniverse: [],
-                    name: "Layer 5"
-                },
-
-                {
-                    objUniverse: [],
-                    name: "Layer 4"
-                },
-
-                {
-                    objUniverse: [],
-                    name: "Layer 3"
-                },
-
-                {
-                    objUniverse: [],
-                    name: "Layer 2"
-                },
-
-                {
-                    objUniverse: [],
-                    name: "Layer 1"
-                },
-
-                {
-                    objUniverse: [],
-                    name: "bounds"
-                }
-
-            ]
-        };
-
-        let topRect = {
-            shape: "rectangle",
-            collisionClass: "0 1 2 3 4",
-            locked: true,
-            x: 0,
-            y: 0,
-            w: staticSim.box.w,
-            h: 10
-        }
-
-        let botomRect = {
-            shape: "rectangle",
-            collisionClass: "0 1 2 3 4",
-            locked: true,
-            x: 0,
-            y: staticSim.box.h,
-            w: staticSim.box.w,
-            h: 10
-        }
-
-        let leftRect = {
-            shape: "rectangle",
-            collisionClass: "0 1 2 3 4",
-            locked: true,
-            x: 0,
-            y: 0,
-            w: 10,
-            h: staticSim.box.h
-        }
-
-        let rightRect = {
-            shape: "rectangle",
-            collisionClass: "0 1 2 3 4",
-            x: 0,
-            y: staticSim.box.w,
-            w: 10,
-            locked: true,
-            h: staticSim.box.h
-        }
-
-        if(this.levels[i].bounds === 0) {
-            level.layers[5].objUniverse.push(topRect,botomRect,leftRect,rightRect);
-        }
-
-        staticSim.simulations.push(level);
-
-        for(let j = 0; j < this.levels[i].bodies.length; j++) {
-            let levelIndex = 4 - (this.levels[i].bodies[j].overlap_layer - 1);
-            level.layers[levelIndex].objUniverse.push(this.levels[i].bodies[j].phSimStaticObj); 
-        }
-
-        if(this.levels[0].gravity === true) {
-            level.world.grav = 0;
-        }
-
-        else {
-            level.world.grav = 1;
-        }
-
-    }
-
-    this.phSimStatic = staticSim;
-    this.phsim = new PhSim(staticSim);
-
-    this.phsim.container.appendChild(this.createDescDiv());
-
-    this.setLevel(this.levels[0]);
-
-    this.phsim.on("beforefirstslupdate",function(e){
-
-        ppgSploderEmulator.phsim.on("aftercanvasclear",function(e){
-            ppgSploderEmulator.renderGradient();
-            ppgSploderEmulator.renderExtensions();  
-        });
-
-        ppgSploderEmulator.phsim.on("objupdate",function(event){
-
-            var currentObj = event.target
-            var currentObjData2 = ppgSploderEmulator.currentLevel.bodyIds[currentObj.name];
-
-            if(currentObjData2 && currentObjData2.builtInGraphicOnly) {
-                this.phRender.dynamicRenderDraw({
-                    ...currentObj,
-                    strokeStyle: "white",
-                    lineWidth: 1
-                });
-            }
-
-            if(currentObjData2 && currentObjData2.built_in_graphic) {
-                this.ctx.textAlign = "center";
-                this.ctx.fillStyle = "white";
-                this.ctx.fillText(dictionary.built_in_graphics[currentObjData2.built_in_graphic],currentObj.matter.position.x,currentObj.matter.position.y);
-            }
-        })
-
-        ppgSploderEmulator.phsim.on("afterupdate",function(event){
-            ppgSploderEmulator.renderGameData();
-        });
-
-
-        console.log(this.objUniverse);
-
-        console.log(ppgSploderEmulator);
-        
-        debugger;
-    });
-
-}
-
-module.exports = createPhSimInstance;
-
-/***/ }),
-
-/***/ 526:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-/**
- * Module used to parse data for physics, controls and widgets.
- * @module src/decodeExtensions
- */
-
-const PPGSploderEmulator = __webpack_require__(138);
-const dictionary = __webpack_require__(280);
-
-function decodeExtensions(extensionData) {
-
-    var a = extensionData.split(";");
-
-    var o = {
-        extension: dictionary.extensions[a[0]],
-        objectA: Number.parseInt(a[1]),
-        pointA: PPGSploderEmulator.parseVector(a[2]),
-        objectB: Number.parseInt(a[3]),
-        pointB: PPGSploderEmulator.parseVector(a[4]),
-    }
-
-    if(o.extension === "motor") {
-        o.radians = Number.parseFloat(a[5]);
-    }
-
-    if(o.extension === "rotator") {
-        o.radians = Number.parseFloat(a[5]);
-    }
-
-    if(o.extension === "arcade_mover") {
-        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
-        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
-        o.distance = Number.parseFloat(a[5]);
-    }
-
-    if(o.extension === "jumper") {
-        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
-        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
-        o.allowAirJumping = !!Number.parseFloat(a[10]);
-    }
-
-    if(o.extension === "mover") {
-        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
-        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
-    }
-
-    if(o.extension === "adder") {
-        o.keyDownSpeed = Number.parseInt(a[5]);
-        o.lifespan = Number.parseFloat(a[7]);
-        o.useMouseClick = !!Number.parseInt(a[8]);
-        o.explodeOnExpire = !!Number.parseInt(a[9]);
-    }
-
-    return o;
-
-}
-
-module.exports = decodeExtensions;
-
-/***/ }),
-
 /***/ 942:
 /***/ ((module) => {
 
@@ -576,91 +91,10 @@ module.exports = createDescDiv;
 
 /***/ }),
 
-/***/ 280:
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","32":"rotator","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"passthrough_layers":["A","B","C","D","E"],"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
-
-/***/ }),
-
-/***/ 290:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const PPGSploderEmulator = __webpack_require__(138);
-const dictionary = __webpack_require__(280);
-
-/**
- * Parse object data to create object.
- * @param {string} dataStr -  String representing object
- * @function
- * @memberof 
- */
-
-function extractObject(dataStr) {
-
-    var a = dataStr.split(/#|;/);
-
-    var o = {
-        bodyData: dataStr,
-        id: Number.parseFloat(a[0]),
-        center: PPGSploderEmulator.parseVector(a[1]),
-        axis: PPGSploderEmulator.parseVector(a[2]),
-        angle: Number.parseFloat(a[3]),
-        group: Number.parseInt(a[4]),
-        shape: dictionary.shapes[a[5]],
-        width: Number.parseFloat(a[6]),
-        height: Number.parseFloat(a[7]),
-        path: PPGSploderEmulator.parseVectorSet(a[8]),
-        constraints: dictionary.constraints[a[9]],
-        material: dictionary.material[a[10]],
-        strength: dictionary.strength[a[11]],
-        lock: !!Number.parseInt(a[12]),
-        collisionBitField: a[13],
-        collisionLayers: PPGSploderEmulator.u5bitfieldDecode(a[13]),
-        passthru: dictionary.passthrough_layers[a[14]],
-        sensorBitField: a[15],
-        sensor: PPGSploderEmulator.decodeSensorLayers(a[15]),
-        fill: PPGSploderEmulator.decodeColor(a[16]),
-        stroke: PPGSploderEmulator.decodeColor(a[17]),
-        built_in_graphic: Number.parseInt(a[18]),
-        overlap_layer: Number.parseInt(a[19]),
-        transparent: !Number.parseInt(a[20]),
-        scribble: !!Number.parseInt(a[21]),
-        events: PPGSploderEmulator.decodeEvents(a[22]),
-        graphic: Number.parseInt(a[23]),
-        texture: a[27],
-    }
-
-    o.builtInGraphicOnly = o.built_in_graphic && (o.stroke === "transparent") && (o.fill === "transparent")
-
-    this.objectIds[o.id] = o;
-
-    o.eventStack = {
-        sensor: [],
-        crush: [],
-        clone: [],
-        boundsout: []
-    }
-
-    o.simulationEventStack = o.eventStack;
-
-    o.extensions = [];
-
-    Object.assign(o,PhSim.PhSimEventTarget);
-
-    return o;
-
-}
-
-module.exports = extractObject;
-
-/***/ }),
-
 /***/ 653:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const dictionary = __webpack_require__(280);
+const dictionary = __webpack_require__(86);
 
 function firstRender() {
 
@@ -1638,10 +1072,10 @@ function incrementLevel() {
 
     return new Promise(function(resolve,reject){
 
-        if(self.levels[self.currentLevelIndex + 1]) {
+        if(self.pixelPhysicsParser.levels[self.currentLevelIndex + 1]) {
             setTimeout(function(){
 
-                self.setLevel(self.levels[self.currentLevelIndex + 1]);
+                self.setLevel(self.pixelPhysicsParser.levels[self.pixelPhysicsParser.currentLevelIndex + 1]);
 
                 self.phsim.gotoSimulationIndex(self.phsim.simulationIndex + 1).then(function(){
                     self.firstRender();
@@ -1671,7 +1105,7 @@ module.exports = incrementLevel;
 "use strict";
 
 
-const dictionary = __webpack_require__(280);
+const dictionary = __webpack_require__(86);
 
 /**
  * Constructor for an instance of the emulator
@@ -1716,93 +1150,11 @@ PPGSploderEmulator.prototype.elevators = [];
 
 /**
  * 
- * Decode a unsigned 5 bit field and turn it into an object.
- * For information, a 5 bit number is a number consisting of 5 bits and could be any value between
- * 0 and 31.
- * 
- * @function
- * @returns {Object}
- * 
- */
-
-PPGSploderEmulator.u5bitfieldDecode = function(bitfield) {
-
-    if(bitfield < 32) {
-
-        return {
-            0: !!(bitfield & Math.pow(2,4)),
-            1: !!(bitfield & Math.pow(2,3)),
-            2: !!(bitfield & Math.pow(2,2)),
-            3: !!(bitfield & Math.pow(2,1)),
-            4: !!(bitfield & Math.pow(2,0)),
-        }
-
-    }
-
-}
-
-PPGSploderEmulator.decodeSensorLayers = function(bitfield) {
-
-    bitfield = PPGSploderEmulator.u5bitfieldDecode(bitfield)
-
-    return {
-        "ace": bitfield[0],
-        "diamond": bitfield[1],
-        "heart": bitfield[2],
-        "spade": bitfield[3],
-        "flower": bitfield[4]
-    }
-}
-
-
-/**
- * 
  * @param {*} str 
  * @returns 
  */
 
 
-
-/**
- * Convert vector from string form to JavaScript object form
- * @param {String} str 
- * @returns {Object} - Vector Object
- * 
- */
-
-PPGSploderEmulator.parseVector = function(str) {
-
-    if(typeof str === "undefined") {
-        debugger;
-    }
-
-    var a = str.split(":");
-
-    return {
-        x: Number.parseFloat(a[0]),
-        y: Number.parseFloat(a[1])
-    }
-
-}
-
-/**
- * Parse vector collection for custom polygons.
- * @function
- * @param {String} str - String representing vector set 
- * @returns {Object[]}
- */
-
-PPGSploderEmulator.parseVectorSet = function(str) {
-
-    var a = str.split(",");
-
-    if(a.length > 0) {
-        return a.map(function(v){
-            return PPGSploderEmulator.parseVector(v);
-        });
-    }
-
-}
 
 PPGSploderEmulator.prototype.renderGradient = function() {
     this.phsim.ctx.fillStyle = this.grad;
@@ -1815,100 +1167,7 @@ PPGSploderEmulator.prototype.currentGameTarget = {
     lives: null,
 }
 
-/**
- * 
- * Decode event information from bitfield.
- * 
- * @function
- * @param {Number} n - An unsigned 32 bit integer used as a bitfield to configure events.
- * @returns {Object} - An object containing information about the events
- */
 
-
-PPGSploderEmulator.decodeEvents = function(n) {
-
-    n = Number.parseInt(n);
-
-    return {
-
-        score: {
-            onsensor: !!(n & Math.pow(2,31)),
-            oncrush: !!(n & Math.pow(2,30)),
-            onclone: !!(n & Math.pow(2,29)),
-            onboundsout: !!(n & Math.pow(2,28)),
-        },
-
-        penalty: {
-            onsensor: !!(n & Math.pow(2,27)),
-            oncrush: !!(n & Math.pow(2,26)),
-            onclone: !!(n & Math.pow(2,25)),
-            onboundsout: !!(n & Math.pow(2,24))
-        },
-
-        loseLife: {
-            onsensor: !!(n & Math.pow(2,23)),
-            oncrush: !!(n & Math.pow(2,22)),
-            onclone: !!(n & Math.pow(2,21)),
-            onboundsout: !!(n & Math.pow(2,20))
-        },
-
-        addLife: {
-            onsensor: !!(n & Math.pow(2,19)),
-            oncrush: !!(n & Math.pow(2,18)),
-            onclone: !!(n & Math.pow(2,17)),
-            onboundsout: !!(n & Math.pow(2,16))
-        },
-
-        unlock: {
-            onsensor: !!(n & Math.pow(2,15)),
-            oncrush: !!(n & Math.pow(2,14)),
-            onclone: !!(n & Math.pow(2,13)),
-            onboundsout: !!(n & Math.pow(2,12))
-        },
-
-        remove: {
-            onsensor: !!(n & Math.pow(2,11)),
-            oncrush: !!(n & Math.pow(2,10)),
-            onclone: !!(n & Math.pow(2,9)),
-            onboundsout: !!(n & Math.pow(2,8))
-        },
-
-        explode: {
-            onsensor: !!(n & Math.pow(2,7)),
-            oncrush: !!(n & Math.pow(2,6)),
-            onclone: !!(n & Math.pow(2,5)),
-            onboundsout: !!(n & Math.pow(2,4))
-        },
-
-        endGame: {
-            onsensor: !!(n & Math.pow(2,3)),
-            oncrush: !!(n & Math.pow(2,2)),
-            onclone: !!(n & Math.pow(2,1)),
-            onboundsout: !!(n & Math.pow(2,0))
-        }
-
-    }
-}
-
-PPGSploderEmulator.decodeColor = function(v) {
-
-    v = Number.parseInt(v);
-
-    if(v === -1) {
-        return "transparent";
-    }
-
-    if(v > -1) {
-
-        let r = v >>> 16;
-        let g = (v >>> 8) & 0b0000000011111111;
-        let b = v & 0b000000000000000011111111;
-    
-        return "rgb(" + r + "," + g + "," + b + ")";
-
-    }
-
-}
 
 
 /**
@@ -1993,7 +1252,7 @@ PPGSploderEmulator.createInstanceByPage = function() {
 
 PPGSploderEmulator.prototype.updatePhSimSprite = function(spriteObj) {
 
-    var graphicObj = this.graphics[spriteObj.data.name_key];
+    var graphicObj = this.pixelPhysicsParser.graphics[spriteObj.data.name_key];
 
     if(spriteObj.data.index === graphicObj.frameArr.length) {
         spriteObj.data.index = 0;
@@ -2046,9 +1305,7 @@ window.addEventListener("load",function(){
 // Loading modules
 
 PPGSploderEmulator.prototype.load = __webpack_require__(169);
-PPGSploderEmulator.prototype.createPhSimInstance = __webpack_require__(813);
-PPGSploderEmulator.prototype.createPhSimDynObject = __webpack_require__(476)
-PPGSploderEmulator.decodeExtensions = __webpack_require__(526);
+PPGSploderEmulator.decodeExtensions = __webpack_require__(582);
 PPGSploderEmulator.prototype.implementExtensions = __webpack_require__(254);
 PPGSploderEmulator.prototype.implementEvents = __webpack_require__(785);
 PPGSploderEmulator.prototype.renderGameData = __webpack_require__(28);
@@ -2056,7 +1313,7 @@ PPGSploderEmulator.prototype.setLevel = __webpack_require__(574);
 PPGSploderEmulator.prototype.firstRender = __webpack_require__(653);
 PPGSploderEmulator.prototype.createDescDiv = __webpack_require__(942);
 PPGSploderEmulator.prototype.incrementLevel = __webpack_require__(554);
-PPGSploderEmulator.prototype.extractObject = __webpack_require__(290);
+PPGSploderEmulator.prototype.Body = __webpack_require__(757);
 PPGSploderEmulator.prototype.renderExtensions = __webpack_require__(491);
 
 // Check for chrome extension
@@ -2071,7 +1328,9 @@ if(chrome && chrome.extension) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const PPGSploderEmulator = __webpack_require__(138);
-const decodeExtensions = __webpack_require__(526); 
+const createPhSimInstance = __webpack_require__(786);
+const PixelPhysicsParser = __webpack_require__(209);
+const dictionary = __webpack_require__(86);
 
 /**
  * Module used to load game data
@@ -2089,182 +1348,52 @@ function load() {
     var self = this;
 
     return new Promise(function(resolve,reject){
-
-        var xmlTree = self.xmlTree;
-    
-        // Get author and title
-    
-        self.author = self.xmlTree.querySelector("project").getAttribute("author");
-        self.title = decodeURI(self.xmlTree.querySelector("project").getAttribute("title"));
-    
-        // Decode and get graphics
-    
-        self.base64imgdata = {};
-        self.graphics = {}
-        self.imgDataURLs = {};
-        self.xml_base64imgdata_children;
-    
-        if(self.xmlTree.querySelector("graphics")) {
-    
-            self.xml_base64imgdata_children = self.xmlTree.querySelector("graphics").children;
-    
-            for(let i = 0; i < self.xml_base64imgdata_children.length; i++) {
-    
-                let name = self.xml_base64imgdata_children[i].getAttribute("name");
-                let id = Number.parseInt(name.split("_")[0]);
-        
-                self.graphics[id] = {
-                    name: name,
-                    frames: []
-                }
-        
-                let data = self.xml_base64imgdata_children[i].innerHTML;
-                self.base64imgdata[name] = data;
-        
-                let decoded_data = atob(data);
-        
-                let charPointIntegers = new Uint8Array(decoded_data.length);
-        
-                for(let j = 0; j < decoded_data.length; j++) {
-                    charPointIntegers[j] = decoded_data.charCodeAt(j);
-                }
-        
-                let blob = new Blob([charPointIntegers],{
-                    type: "image/png"
-                });
-        
-                let url = URL.createObjectURL(blob);
-        
-                self.imgDataURLs[name] = url;
-        
-                // Add graphics url
-        
-                self.graphics[id].url = url;
-
-
-            }
-    
-        }
-
-
-        // Get level information
-    
-        self.levels = [];
-    
-        let levelsChildren = self.xmlTree.querySelector("levels").children;
-    
-        for(let i = 0; i < levelsChildren.length; i++) {
-    
-            let envArr = levelsChildren[i].getAttribute("env").split(";");
-    
-            let musicInfo;
-    
-            if(envArr[12]) {
-    
-                let musicArr = envArr[12].split("/");
-    
-                // Old Sploder PPG games from early 2011 do not support music, so checking if music information is an array is necessary.
-    
-                if(Array.isArray(musicArr) && musicArr[0] !== "0") {
-                    musicInfo = {
-                        author: musicArr[0],
-                        filename: musicArr[1],
-                        name: musicArr[1].split(".")[0]
-                    }
-                }
-    
-            }
-    
-            let levelDataStr = levelsChildren[i].innerHTML;
-            let entitiesData = levelDataStr.split("$");
-    
-            // Data for bodies
-     
-            let bodyData = entitiesData[0];
-            let bodyDataParts = bodyData.split("|");
-    
-            let bodies = [];
-            let bodyIds = {}
-            let groups = {}
-    
-            for(let i = 0; i < bodyDataParts.length; i++) {
-
-                let body = self.extractObject(bodyDataParts[i]);
-                self.createPhSimDynObject(body);
-                
-                // Body id structure
-
-                bodyIds[body.id] = body;
-
-                // Get object group, if object is grouped
-
-                groups[body.group] = groups[body.group] || [];
-                groups[body.group].push(body);
-
-                bodies.push(body);
-            }
-    
-            // Data for physics, controls and widgets
-
-            let extensions = [];
-    
-            let xData = entitiesData[1]; 
-            let xDataParts = xData.split("|");
-
-            if(xData) {
-                for(let i = 0; i < xDataParts.length; i++) {
-                    extensions.push(decodeExtensions(xDataParts[i]));
-                }    
-            }
-
-            // Add level data
-    
-            self.levels.push({
-
-                data: levelDataStr,
-
-                extensions: extensions,
-    
-                music: musicInfo,
-
-                groups: groups,
-    
-                gradient: {
-                    top: PPGSploderEmulator.decodeColor(envArr[1]),
-                    bottom: PPGSploderEmulator.decodeColor(envArr[0])
-                },
-    
-                background: envArr[2],
-    
-                bounds: Number.parseInt(envArr[3]),
-    
-                gravity: !!Number.parseInt(envArr[4]),
-    
-                motionResistance: !!Number.parseInt(envArr[5]),
-    
-                level_size: Number.parseInt(envArr[6]),
-    
-                starting_lives: Number.parseInt(envArr[7]),
-    
-                max_penalty: Number.parseInt(envArr[8]),
-    
-                score_goal: Number.parseInt(envArr[9]),
-    
-                time_limit: Number.parseFloat(envArr[10]),
-    
-                description: envArr[11],
-    
-                bodies: bodies,
-
-                bodyIds: bodyIds
-    
-            });
-    
-        }
     
         // Creating PhSim instance
-    
-        self.createPhSimInstance();
+
+        self.pixelPhysicsParser = new PixelPhysicsParser(self.xmlTree);
+        self.phsim = createPhSimInstance(self.pixelPhysicsParser);
+        self.phsim.container.appendChild(self.createDescDiv());
+        self.setLevel(self.pixelPhysicsParser.levels[0]);
+
+        self.phsim.on("beforefirstslupdate",function(e){
+
+            self.phsim.on("aftercanvasclear",function(e){
+                self.renderGradient();
+                self.renderExtensions();  
+            });
+
+            self.phsim.on("objupdate",function(event){
+
+                var currentObj = event.target
+                var currentObjData2 = self.currentLevel.bodyIds[currentObj.name];
+
+                if(currentObjData2 && currentObjData2.builtInGraphicOnly) {
+                    this.phRender.dynamicRenderDraw({
+                        ...currentObj,
+                        strokeStyle: "white",
+                        lineWidth: 1
+                    });
+                }
+
+                if(currentObjData2 && currentObjData2.built_in_graphic) {
+                    this.ctx.textAlign = "center";
+                    this.ctx.fillStyle = "white";
+                    this.ctx.fillText(dictionary.built_in_graphics[currentObjData2.built_in_graphic],currentObj.matter.position.x,currentObj.matter.position.y);
+                }
+            })
+
+            self.phsim.on("afterupdate",function(event){
+                self.renderGameData();
+            });
+
+
+            //console.log(this.objUniverse);
+
+            //console.log(ppgSploderEmulator);
+            
+            debugger;
+        });
 
         resolve();
 
@@ -2274,7 +1403,7 @@ function load() {
             // Decompose Graphics
 
             var graphicCount = 0;
-            var graphicsArr = Object.values(self.graphics);
+            var graphicsArr = Object.values(self.pixelPhysicsParser.graphics);
 
             if(graphicsArr.length === 0) {
                 resolve();
@@ -2341,6 +1470,909 @@ function load() {
 }
 
 module.exports = load;
+
+/***/ }),
+
+/***/ 816:
+/***/ ((module) => {
+
+/**
+ * 
+ * @param {Object}
+ * @returns {Object}
+ * 
+ * @this PPGSploderEmulator
+ * @memberof PPGSploderEmulator.prototype
+ */
+
+
+function createPhSimDynObject(o,pixelPhysicsParser) {
+
+    var p = {}
+
+    o.phSimStaticObj = p;
+
+    // Widgets Property
+
+    p.widgets = [];
+
+    // Collision Classes
+
+    var collisionClassArr = []
+
+    for(let i = 0; i < 5; i++) {
+        if(o.collisionLayers[i]) {
+            collisionClassArr.push(i.toString());
+        }
+    }
+
+    p.collisionClass = collisionClassArr.join(" ");
+
+    if(collisionClassArr.length === 0) {
+        p.noCollision = true;
+    }
+
+    // Name
+
+    p.name = o.id;
+
+    // Sensor Layers
+
+    var sensorClassArr = [];
+
+    if(o.sensor.ace) {
+        sensorClassArr.push("ace");
+    }
+
+    if(o.sensor.diamond) {
+        sensorClassArr.push("diamond");
+    }
+
+    if(o.sensor.heart) {
+        sensorClassArr.push("heart");
+    }
+
+    if(o.sensor.spade) {
+        sensorClassArr.push("spade");
+    }
+
+    if(o.sensor.spade) {
+        sensorClassArr.push("flower");
+    }
+
+    p.sensorClass= sensorClassArr.join(" ");
+
+    // Colors
+
+    p.fillStyle = o.fill;
+    p.strokeStyle = o.stroke;
+    p.lineWidth = 4;
+
+    // Graphics
+
+    if(o.graphic) {
+
+        p.sprite = {
+            src: pixelPhysicsParser.graphics[o.graphic].url,
+
+            data: {
+                name_key: Number.parseInt(pixelPhysicsParser.graphics[o.graphic].name),
+                index: 0
+            }
+        }
+
+    }
+
+    // Locks
+
+    if(o.lock || o.constraints === "lock") {
+        p.locked = true;
+    }
+
+    // No Rotation
+
+    if(o.constraints === "noRotation") {
+        p.widgets.push({
+            type: "noRotation"
+        })
+    }
+
+    // Axis Restraint
+
+    if(o.constraints === "axis") {
+        p.widgets.push({
+            type: "circularConstraint" 
+        })
+    }
+
+    if(p.cycle) {
+        p.cycle = (Math.PI/360) * (o.angle - 90);
+    }
+
+    else {
+        p.cycle = 0;
+    }
+
+    if(o.shape === "circle") {
+        p.shape = "circle";
+        p.x = o.center.x;
+        p.y = o.center.y;
+        p.radius = o.width / 2;
+        
+        if(p.sprite) {
+            p.sprite.fit = true;
+        }
+
+    }
+
+    if(o.shape === "rectangle") {
+        p.x = o.center.x - o.width * 0.5;
+        p.y = o.center.y - o.height * 0.5;
+        p.w = o.width;
+        p.h = o.height;
+        p.shape = "rectangle";
+
+        if(p.sprite) {
+            p.sprite.fit = true;
+        }
+
+    }
+
+    if(o.shape === "square") {
+        p.x = o.center.x - o.width * 0.5;
+        p.y = o.center.y - o.height * 0.5;
+        p.w = o.width;
+        p.h = o.width;
+        p.shape = "rectangle";
+
+        if(p.sprite) {
+            p.sprite.fit = true;
+        }
+
+    }
+
+    if(o.shape === "pentagon") {
+        p.shape = "regPolygon";
+        p.x = o.center.x;
+        p.y = o.center.y;
+        p.radius = o.width;
+        p.sides = 5;
+
+        if(p.sprite) {
+            p.sprite.fit = true;
+        }
+    }
+    
+    if(o.shape === "hexagon") {
+        p.shape = "regPolygon";
+        p.x = o.center.x;
+        p.y = o.center.y;
+        p.radius = o.width;
+        p.sides = 6;
+ 
+        if(p.sprite) {
+            p.sprite.fit = true;
+        }
+
+    }
+
+    if(o.shape === "right_angle_triangle") {
+
+        p.shape = "polygon",
+
+        p.verts = [
+
+            {
+                x: o.center.x + 0.5 * o.width,
+                y: o.center.y - 0.5 * o.width
+            },
+
+            {
+                x: o.center.x + 0.5 * o.width,
+                y: o.center.y + 0.5 * o.width
+            },
+
+            {
+                x: o.center.x - 0.5 * o.width,
+                y: o.center.y - 0.5 * o.width
+            }
+        ]
+
+        if(p.sprite) {
+            p.sprite.repeat = true;
+        }
+
+    }
+
+    if(o.shape === "custom_polygon") {
+
+        p.shape = "polygon";
+
+        let verts = JSON.parse(JSON.stringify(o.path));
+
+        for(let i = 0; i < verts.length; i++) {
+            verts[i].x = o.center.x + verts[i].x;
+            verts[i].y = o.center.y + verts[i].y;
+        }
+
+        p.verts = verts;
+
+        //debugger;
+
+    }
+
+    return p;
+    
+
+}
+
+module.exports = createPhSimDynObject;
+
+/***/ }),
+
+/***/ 786:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const dictionary = __webpack_require__(86);
+const createPhSimDynObject = __webpack_require__(816);
+
+/**
+ * 
+ * @param {PixelPhysicsParser} pixelPhysicsParser 
+ */
+
+function createPhSimInstance(pixelPhysicsParser) {
+    
+    var staticSim = {
+
+        simulations: [],
+
+        box: {
+            w: 640,
+            h: 480
+        }
+
+    }
+
+    for(let i = 0; i < pixelPhysicsParser.levels.length; i++) {
+
+        let level = {
+
+            data: {
+                sploder: pixelPhysicsParser.levels[i]
+            },
+
+            world: {},
+
+            layers: [
+                {
+                    objUniverse: [],
+                    name: "Layer 5"
+                },
+
+                {
+                    objUniverse: [],
+                    name: "Layer 4"
+                },
+
+                {
+                    objUniverse: [],
+                    name: "Layer 3"
+                },
+
+                {
+                    objUniverse: [],
+                    name: "Layer 2"
+                },
+
+                {
+                    objUniverse: [],
+                    name: "Layer 1"
+                },
+
+                {
+                    objUniverse: [],
+                    name: "bounds"
+                }
+
+            ]
+        };
+
+        let topRect = {
+            shape: "rectangle",
+            collisionClass: "0 1 2 3 4",
+            locked: true,
+            x: 0,
+            y: 0,
+            w: staticSim.box.w,
+            h: 10
+        }
+
+        let botomRect = {
+            shape: "rectangle",
+            collisionClass: "0 1 2 3 4",
+            locked: true,
+            x: 0,
+            y: staticSim.box.h,
+            w: staticSim.box.w,
+            h: 10
+        }
+
+        let leftRect = {
+            shape: "rectangle",
+            collisionClass: "0 1 2 3 4",
+            locked: true,
+            x: 0,
+            y: 0,
+            w: 10,
+            h: staticSim.box.h
+        }
+
+        let rightRect = {
+            shape: "rectangle",
+            collisionClass: "0 1 2 3 4",
+            x: 0,
+            y: staticSim.box.w,
+            w: 10,
+            locked: true,
+            h: staticSim.box.h
+        }
+
+        if(pixelPhysicsParser.levels[i].bounds === 0) {
+            level.layers[5].objUniverse.push(topRect,botomRect,leftRect,rightRect);
+        }
+
+        staticSim.simulations.push(level);
+
+        for(let j = 0; j < pixelPhysicsParser.levels[i].bodies.length; j++) {
+
+            let levelIndex = 4 - (pixelPhysicsParser.levels[i].bodies[j].overlap_layer - 1);
+
+            let o = pixelPhysicsParser.levels[i].bodies[j];
+            let p = createPhSimDynObject(o,pixelPhysicsParser);
+
+            level.layers[levelIndex].objUniverse.push(p); 
+        }
+
+        if(pixelPhysicsParser.levels[0].gravity === true) {
+            level.world.grav = 0;
+        }
+
+        else {
+            level.world.grav = 1;
+        }
+
+        
+        var phsim = new PhSim(staticSim);
+
+    }
+    
+    return phsim;
+
+}
+
+module.exports = createPhSimInstance;
+
+/***/ }),
+
+/***/ 757:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const PPGSploderEmulator = __webpack_require__(138);
+const dictionary = __webpack_require__(86);
+const dataTypes = __webpack_require__(468);
+
+/**
+ * Parse object data to create object.
+ * @param {string} dataStr -  String representing object
+ * @function
+ * @memberof 
+ */
+
+function extractObject(dataStr) {
+
+
+
+
+}
+
+function Body(dataStr) {
+
+    var a = dataStr.split(/#|;/);
+
+
+    this.bodyData = dataStr,
+    this.id = Number.parseFloat(a[0]),
+    this.center = dataTypes.parseVector(a[1]),
+    this.axis = dataTypes.parseVector(a[2]),
+    this.angle = Number.parseFloat(a[3]),
+    this.group = Number.parseInt(a[4]),
+    this.shape = dictionary.shapes[a[5]],
+    this.width = Number.parseFloat(a[6]),
+    this.height = Number.parseFloat(a[7]),
+    this.path = dataTypes.parseVectorSet(a[8]),
+    this.constraints = dictionary.constraints[a[9]],
+    this.material = dictionary.material[a[10]],
+    this.strength = dictionary.strength[a[11]],
+    this.lock = !!Number.parseInt(a[12]),
+    this.collisionBitField = a[13],
+    this.collisionLayers = dataTypes.u5bitfieldDecode(a[13]),
+    this.passthru = dictionary.passthrough_layers[a[14]],
+    this.sensorBitField = a[15],
+    this.sensor = dataTypes.decodeSensorLayers(a[15]),
+    this.fill = dataTypes.decodeColor(a[16]),
+    this.stroke = dataTypes.decodeColor(a[17]),
+    this.built_in_graphic = Number.parseInt(a[18]),
+    this.overlap_layer = Number.parseInt(a[19]),
+    this.transparent = !Number.parseInt(a[20]),
+    this.scribble = !!Number.parseInt(a[21]),
+    this.events = dataTypes.decodeEvents(a[22]),
+    this.graphic = Number.parseInt(a[23]),
+    this.texture = a[27],
+    
+    this.builtInGraphicOnly = this.built_in_graphic && (this.stroke === "transparent") && (this.fill === "transparent")
+
+    //this.objectIds[this.id] = o;
+
+    this.eventStack = {
+        sensor: [],
+        crush: [],
+        clone: [],
+        boundsout: []
+    }
+
+    this.simulationEventStack = this.eventStack;
+
+    this.extensions = [];
+
+    Object.assign(this,PhSim.PhSimEventTarget);
+
+}
+
+module.exports = Body;
+
+/***/ }),
+
+/***/ 468:
+/***/ ((module) => {
+
+const dataTypes = {}
+
+/**
+ * 
+ * Decode a unsigned 5 bit field and turn it into an object.
+ * For information, a 5 bit number is a number consisting of 5 bits and could be any value between
+ * 0 and 31.
+ * 
+ * @function
+ * @returns {Object}
+ * 
+ */
+
+dataTypes.u5bitfieldDecode = function(bitfield) {
+
+    if(bitfield < 32) {
+
+        return {
+            0: !!(bitfield & Math.pow(2,4)),
+            1: !!(bitfield & Math.pow(2,3)),
+            2: !!(bitfield & Math.pow(2,2)),
+            3: !!(bitfield & Math.pow(2,1)),
+            4: !!(bitfield & Math.pow(2,0)),
+        }
+
+    }
+
+}
+
+dataTypes.decodeSensorLayers = function(bitfield) {
+
+    bitfield = dataTypes.u5bitfieldDecode(bitfield)
+
+    return {
+        "ace": bitfield[0],
+        "diamond": bitfield[1],
+        "heart": bitfield[2],
+        "spade": bitfield[3],
+        "flower": bitfield[4]
+    }
+}
+
+/**
+ * Convert vector from string form to JavaScript object form
+ * @param {String} str 
+ * @returns {Object} - Vector Object
+ * 
+ */
+
+dataTypes.parseVector = function(str) {
+
+    if(typeof str === "undefined") {
+        debugger;
+    }
+
+    var a = str.split(":");
+
+    return {
+        x: Number.parseFloat(a[0]),
+        y: Number.parseFloat(a[1])
+    }
+
+}
+
+/**
+ * Parse vector collection for custom polygons.
+ * @function
+ * @param {String} str - String representing vector set 
+ * @returns {Object[]}
+ */
+
+dataTypes.parseVectorSet = function(str) {
+
+    var a = str.split(",");
+
+    if(a.length > 0) {
+        return a.map(function(v){
+            return dataTypes.parseVector(v);
+        });
+    }
+
+}
+
+/**
+ * 
+ * Decode event information from bitfield.
+ * 
+ * @function
+ * @param {Number} n - An unsigned 32 bit integer used as a bitfield to configure events.
+ * @returns {Object} - An object containing information about the events
+ */
+
+
+dataTypes.decodeEvents = function(n) {
+
+    n = Number.parseInt(n);
+
+    return {
+
+        score: {
+            onsensor: !!(n & Math.pow(2,31)),
+            oncrush: !!(n & Math.pow(2,30)),
+            onclone: !!(n & Math.pow(2,29)),
+            onboundsout: !!(n & Math.pow(2,28)),
+        },
+
+        penalty: {
+            onsensor: !!(n & Math.pow(2,27)),
+            oncrush: !!(n & Math.pow(2,26)),
+            onclone: !!(n & Math.pow(2,25)),
+            onboundsout: !!(n & Math.pow(2,24))
+        },
+
+        loseLife: {
+            onsensor: !!(n & Math.pow(2,23)),
+            oncrush: !!(n & Math.pow(2,22)),
+            onclone: !!(n & Math.pow(2,21)),
+            onboundsout: !!(n & Math.pow(2,20))
+        },
+
+        addLife: {
+            onsensor: !!(n & Math.pow(2,19)),
+            oncrush: !!(n & Math.pow(2,18)),
+            onclone: !!(n & Math.pow(2,17)),
+            onboundsout: !!(n & Math.pow(2,16))
+        },
+
+        unlock: {
+            onsensor: !!(n & Math.pow(2,15)),
+            oncrush: !!(n & Math.pow(2,14)),
+            onclone: !!(n & Math.pow(2,13)),
+            onboundsout: !!(n & Math.pow(2,12))
+        },
+
+        remove: {
+            onsensor: !!(n & Math.pow(2,11)),
+            oncrush: !!(n & Math.pow(2,10)),
+            onclone: !!(n & Math.pow(2,9)),
+            onboundsout: !!(n & Math.pow(2,8))
+        },
+
+        explode: {
+            onsensor: !!(n & Math.pow(2,7)),
+            oncrush: !!(n & Math.pow(2,6)),
+            onclone: !!(n & Math.pow(2,5)),
+            onboundsout: !!(n & Math.pow(2,4))
+        },
+
+        endGame: {
+            onsensor: !!(n & Math.pow(2,3)),
+            oncrush: !!(n & Math.pow(2,2)),
+            onclone: !!(n & Math.pow(2,1)),
+            onboundsout: !!(n & Math.pow(2,0))
+        }
+
+    }
+}
+
+dataTypes.decodeColor = function(v) {
+
+    v = Number.parseInt(v);
+
+    if(v === -1) {
+        return "transparent";
+    }
+
+    if(v > -1) {
+
+        let r = v >>> 16;
+        let g = (v >>> 8) & 0b0000000011111111;
+        let b = v & 0b000000000000000011111111;
+    
+        return "rgb(" + r + "," + g + "," + b + ")";
+
+    }
+
+}
+
+module.exports = dataTypes;
+
+/***/ }),
+
+/***/ 582:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/**
+ * Module used to parse data for physics, controls and widgets.
+ * @module src/decodeExtensions
+ */
+
+const dictionary = __webpack_require__(86);
+const dataTypes = __webpack_require__(468);
+
+function decodeExtensions(extensionData) {
+
+    var a = extensionData.split(";");
+
+    var o = {
+        extension: dictionary.extensions[a[0]],
+        objectA: Number.parseInt(a[1]),
+        pointA: dataTypes.parseVector(a[2]),
+        objectB: Number.parseInt(a[3]),
+        pointB: dataTypes.parseVector(a[4]),
+    }
+
+    if(o.extension === "motor") {
+        o.radians = Number.parseFloat(a[5]);
+    }
+
+    if(o.extension === "rotator") {
+        o.radians = Number.parseFloat(a[5]);
+    }
+
+    if(o.extension === "arcade_mover") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+        o.distance = Number.parseFloat(a[5]);
+    }
+
+    if(o.extension === "jumper") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+        o.allowAirJumping = !!Number.parseFloat(a[10]);
+    }
+
+    if(o.extension === "mover") {
+        o.arrowKeysOnly  = !!Number.parseFloat(a[8]);
+        o.wasdKeysOnly = !!Number.parseFloat(a[9]);
+    }
+
+    if(o.extension === "adder") {
+        o.keyDownSpeed = Number.parseInt(a[5]);
+        o.lifespan = Number.parseFloat(a[7]);
+        o.useMouseClick = !!Number.parseInt(a[8]);
+        o.explodeOnExpire = !!Number.parseInt(a[9]);
+    }
+
+    return o;
+
+}
+
+module.exports = decodeExtensions;
+
+/***/ }),
+
+/***/ 86:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"extensions":{"25":"bouncer","26":"pinjoint","28":"spring_t","29":"spring_l","30":"grove","31":"motor","32":"rotator","33":"mover","34":"slider","35":"launcher","36":"selector","37":"adder","38":"elevator","39":"spawner","42":"factory","43":"eventLink","44":"switcher","45":"jumper","46":"e_magnet","47":"gear_joint","48":"aimer","49":"pointer","50":"dragger","53":"propeller","54":"clicker","55":"arcade_mover"},"strength":{"21":"unbreakable","22":"barely_unbreakable","23":"average","24":"brittle"},"constraints":{"8":"lock","9":"no_rotation","10":"axis","11":null},"shapes":{"1":"custom_polygon","2":"hexagon","3":"pentagon","4":"rectangle","5":"right_angle_triangle","6":"circle","7":"square"},"material":{"12":"tire","13":"glass","14":"rubber","15":"ice","16":"steel","17":"wood","18":"nogravity","19":"antigravity","21":"magnet","51":"bouncy"},"passthrough_layers":["A","B","C","D","E"],"built_in_graphics":{"14":"One Eye","15":"Two Eyes","16":"Baddie","17":"Player","18":"Grass Platform","19":"Question Mark","20":"Dollar Sign","21":"Spikes","22":"Star","24":"Checker Pattern","26":"Gear","27":"Ice Platform","32":"Key","33":"Coin","34":"Bomb","35":"Skull"}}');
+
+/***/ }),
+
+/***/ 209:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const decodeExtensions = __webpack_require__(582);
+const Body = __webpack_require__(757); 
+const dataTypes = __webpack_require__(468);
+
+function PixelPhysicsParser(xmlTree) {
+
+    this.xmlTree = xmlTree
+
+    // Get author and title
+
+    this.author = this.xmlTree.querySelector("project").getAttribute("author");
+    this.title = decodeURI(this.xmlTree.querySelector("project").getAttribute("title"));
+
+    // Decode and get graphics
+
+    this.base64imgdata = {};
+    this.graphics = {}
+    this.imgDataURLs = {};
+    this.xml_base64imgdata_children;
+
+    if(this.xmlTree.querySelector("graphics")) {
+    
+        this.xml_base64imgdata_children = this.xmlTree.querySelector("graphics").children;
+
+        for(let i = 0; i < this.xml_base64imgdata_children.length; i++) {
+
+            let name = this.xml_base64imgdata_children[i].getAttribute("name");
+            let id = Number.parseInt(name.split("_")[0]);
+    
+            this.graphics[id] = {
+                name: name,
+                frames: []
+            }
+    
+            let data = this.xml_base64imgdata_children[i].innerHTML;
+            this.base64imgdata[name] = data;
+    
+            let decoded_data = atob(data);
+    
+            let charPointIntegers = new Uint8Array(decoded_data.length);
+    
+            for(let j = 0; j < decoded_data.length; j++) {
+                charPointIntegers[j] = decoded_data.charCodeAt(j);
+            }
+    
+            let blob = new Blob([charPointIntegers],{
+                type: "image/png"
+            });
+    
+            let url = URL.createObjectURL(blob);
+    
+            this.imgDataURLs[name] = url;
+    
+            // Add graphics url
+    
+            this.graphics[id].url = url;
+
+
+        }
+
+    }
+
+    // Get level information
+    
+    this.levels = [];
+    
+    let levelsChildren = this.xmlTree.querySelector("levels").children;
+
+    for(let i = 0; i < levelsChildren.length; i++) {
+    
+        let envArr = levelsChildren[i].getAttribute("env").split(";");
+
+        let musicInfo;
+
+        if(envArr[12]) {
+
+            let musicArr = envArr[12].split("/");
+
+            // Old Sploder PPG games from early 2011 do not support music, so checking if music information is an array is necessary.
+
+            if(Array.isArray(musicArr) && musicArr[0] !== "0") {
+                musicInfo = {
+                    author: musicArr[0],
+                    filename: musicArr[1],
+                    name: musicArr[1].split(".")[0]
+                }
+            }
+
+        }
+
+        let levelDataStr = levelsChildren[i].innerHTML;
+        let entitiesData = levelDataStr.split("$");
+
+        // Data for bodies
+ 
+        let bodyData = entitiesData[0];
+        let bodyDataParts = bodyData.split("|");
+
+        let bodies = [];
+        let bodyIds = {}
+        let groups = {}
+
+        for(let i = 0; i < bodyDataParts.length; i++) {
+
+            let body = new Body(bodyDataParts[i]);
+            
+            // Body id structure
+
+            bodyIds[body.id] = body;
+
+            // Get object group, if object is grouped
+
+            groups[body.group] = groups[body.group] || [];
+            groups[body.group].push(body);
+
+            bodies.push(body);
+        }
+
+        // Data for physics, controls and widgets
+
+        let extensions = [];
+
+        let xData = entitiesData[1]; 
+        let xDataParts = xData.split("|");
+
+        if(xData) {
+            for(let i = 0; i < xDataParts.length; i++) {
+                extensions.push(decodeExtensions(xDataParts[i]));
+            }    
+        }
+
+        // Add level data
+
+        this.levels.push({
+
+            data: levelDataStr,
+
+            extensions: extensions,
+
+            music: musicInfo,
+
+            groups: groups,
+
+            gradient: {
+                top: dataTypes.decodeColor(envArr[1]),
+                bottom: dataTypes.decodeColor(envArr[0])
+            },
+
+            background: envArr[2],
+
+            bounds: Number.parseInt(envArr[3]),
+
+            gravity: !!Number.parseInt(envArr[4]),
+
+            motionResistance: !!Number.parseInt(envArr[5]),
+
+            level_size: Number.parseInt(envArr[6]),
+
+            starting_lives: Number.parseInt(envArr[7]),
+
+            max_penalty: Number.parseInt(envArr[8]),
+
+            score_goal: Number.parseInt(envArr[9]),
+
+            time_limit: Number.parseFloat(envArr[10]),
+
+            description: envArr[11],
+
+            bodies: bodies,
+
+            bodyIds: bodyIds
+
+        });
+
+    }
+}
+
+
+
+
+module.exports = PixelPhysicsParser;
 
 /***/ }),
 
@@ -2424,7 +2456,7 @@ function setLevel(level) {
 
     this.currentLevel = level; 
 
-    this.currentLevelIndex = this.levels.indexOf(level);
+    this.currentLevelIndex = this.pixelPhysicsParser.levels.indexOf(level);
 
     this.descTxt.innerText = this.currentLevel.description;
     this.descDiv.style.display = "block";

@@ -1,4 +1,4 @@
-const dictionary = require("./dictionary.json");
+const dictionary = require("./pixelphysics-parser/dictionary.json");
 
 function firstRender() {
 
