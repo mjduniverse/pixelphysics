@@ -3,8 +3,8 @@
  * @module src/decodeExtensions
  */
 
-const PPGSploderEmulator = require(".");
 const dictionary = require("./dictionary.json");
+const dataTypes = require("./datatypes");
 
 function decodeExtensions(extensionData) {
 
@@ -13,9 +13,9 @@ function decodeExtensions(extensionData) {
     var o = {
         extension: dictionary.extensions[a[0]],
         objectA: Number.parseInt(a[1]),
-        pointA: PPGSploderEmulator.parseVector(a[2]),
+        pointA: dataTypes.parseVector(a[2]),
         objectB: Number.parseInt(a[3]),
-        pointB: PPGSploderEmulator.parseVector(a[4]),
+        pointB: dataTypes.parseVector(a[4]),
     }
 
     if(o.extension === "motor") {

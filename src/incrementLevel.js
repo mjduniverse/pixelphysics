@@ -4,10 +4,10 @@ function incrementLevel() {
 
     return new Promise(function(resolve,reject){
 
-        if(self.levels[self.currentLevelIndex + 1]) {
+        if(self.pixelPhysicsParser.levels[self.currentLevelIndex + 1]) {
             setTimeout(function(){
 
-                self.setLevel(self.levels[self.currentLevelIndex + 1]);
+                self.setLevel(self.pixelPhysicsParser.levels[self.pixelPhysicsParser.currentLevelIndex + 1]);
 
                 self.phsim.gotoSimulationIndex(self.phsim.simulationIndex + 1).then(function(){
                     self.firstRender();
