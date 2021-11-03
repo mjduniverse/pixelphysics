@@ -1,6 +1,7 @@
 // Emulator Instance Variable
 
 var ppgSploderEmulator;
+var ppgSploderEmulatorGlobal = true;
 
 // Level Testing Div
 

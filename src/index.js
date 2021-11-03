@@ -211,6 +211,6 @@ PPGSploderEmulator.prototype.renderExtensions = require("./renderExtensions");
 
 // Check for chrome extension
 
-if(chrome && chrome.extension) {
+if( (chrome && chrome.extension) || window.ppgSploderEmulatorGlobal) {
     window.PPGSploderEmulator = PPGSploderEmulator;
 }

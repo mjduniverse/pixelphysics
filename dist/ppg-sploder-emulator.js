@@ -1305,7 +1305,6 @@ window.addEventListener("load",function(){
 // Loading modules
 
 PPGSploderEmulator.prototype.load = __webpack_require__(169);
-PPGSploderEmulator.decodeExtensions = __webpack_require__(582);
 PPGSploderEmulator.prototype.implementExtensions = __webpack_require__(254);
 PPGSploderEmulator.prototype.implementEvents = __webpack_require__(785);
 PPGSploderEmulator.prototype.renderGameData = __webpack_require__(28);
@@ -1313,12 +1312,11 @@ PPGSploderEmulator.prototype.setLevel = __webpack_require__(574);
 PPGSploderEmulator.prototype.firstRender = __webpack_require__(653);
 PPGSploderEmulator.prototype.createDescDiv = __webpack_require__(942);
 PPGSploderEmulator.prototype.incrementLevel = __webpack_require__(554);
-PPGSploderEmulator.prototype.Body = __webpack_require__(757);
 PPGSploderEmulator.prototype.renderExtensions = __webpack_require__(491);
 
 // Check for chrome extension
 
-if(chrome && chrome.extension) {
+if( (chrome && chrome.extension) || window.ppgSploderEmulatorGlobal) {
     window.PPGSploderEmulator = PPGSploderEmulator;
 }
 
